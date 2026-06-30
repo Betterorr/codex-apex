@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agent Lanes Registry",
+  "type": "object",
+  "required": ["version", "agents"],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    },
+    "agents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "agent_id",
+          "display_name",
+          "lane",
+          "thread_id",
+          "responsibility",
+          "boundary",
+          "status",
+          "worklog",
+          "workspace"
+        ],
+        "properties": {
+          "agent_id": {
+            "type": "string",
+            "description": "Stable machine-readable id, such as orchestrator or development."
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "lane": {
+            "type": "string"
+          },
+          "thread_id": {
+            "type": "string",
+            "description": "Codex thread id or placeholder when manually managed."
+          },
+          "deep_link": {
+            "type": "string"
+          },
+          "responsibility": {
+            "type": "string"
+          },
+          "boundary": {
+            "type": "string"
+          },
+          "write_scope": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "read_scope": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "worklog": {
+            "type": "string"
+          },
+          "workspace": {
+            "type": "string"
+          },
+          "artifact_dir": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "paused", "archived", "pending_setup", "blocked"]
+          },
+          "last_seen_at": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

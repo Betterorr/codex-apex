@@ -1,0 +1,17 @@
+template-packages/
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+.DS_Store
+Thumbs.db
+
+.env
+.env.*
+!.env.example
+
+*.log
+*.tmp
+*.bak
+

@@ -1,0 +1,11 @@
+{
+  "enabled_at": "<SET_ON_INSTALL_ISO8601>",
+  "mode": "advisory",
+  "strict_env": "AGENT_LANES_POST_OFFICE_STRICT=1",
+  "strict_direct_bypass_env": "AGENT_LANES_POST_OFFICE_STRICT_DIRECT_BYPASS=1",
+  "legacy_direct_bypass_message_ids": [],
+  "legacy_stranded_delivery_message_ids": [],
+  "legacy_garbled_payload_message_ids": [],
+  "legacy_garbled_payload_before": null,
+  "notes": "Default checks should start at install time so historical legacy callbacks do not create noisy warnings. Completion-like callbacks include focused_review-style replies when they carry summary, evidence, changed_files, concerns, and next action fields. legacy allowlists are narrow migration lists only; keep them empty for new projects unless a documented cleanup requires explicit historical ids."
+}

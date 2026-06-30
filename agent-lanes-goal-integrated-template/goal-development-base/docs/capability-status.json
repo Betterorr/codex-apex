@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "updated_at": null,
+  "purpose": "Machine-readable capability maturity registry for local models, providers, CLIs, SDKs, media tools, and external APIs. This registry guides orchestration but does not replace evidence.",
+  "maturity_levels": [
+    "contract_defined",
+    "dependency_available",
+    "real_smoke_passed",
+    "real_sample_output_saved",
+    "integration_connected",
+    "quality_reviewed",
+    "production_ready"
+  ],
+  "capabilities": [
+    {
+      "id": "example-local-or-external-capability",
+      "domain": "replace-with-domain",
+      "provider": "replace-with-provider",
+      "kind": "local_model | local_cli | sdk | external_api | media_tool",
+      "runtime": "replace-with-runtime-or-location",
+      "maturity": "contract_defined",
+      "approval": {
+        "required": false,
+        "status": "not_required | pending_user_approval | approved",
+        "reason": "Explain whether this can run locally or needs explicit user approval."
+      },
+      "budget": {
+        "live_call_limit": null,
+        "cost_limit": null,
+        "notes": "For external APIs, record the approved call/count/cost limit."
+      },
+      "evidence": [
+        {
+          "type": "replace-with-evidence-type",
+          "path": "replace-with-relative-or-absolute-evidence-path",
+          "status": "planned",
+          "summary": "Short evidence summary."
+        }
+      ],
+      "rerun_command": "replace-with-safe-rerun-command",
+      "next_step": "Describe the shortest next step toward real execution or workflow integration.",
+      "expires_when": "Describe when this evidence or status must be refreshed.",
+      "variants": [
+        {
+          "id": "optional-variant-example",
+          "maturity": "contract_defined",
+          "notes": "Use variants when one provider has materially different modes such as CPU/GPU, sync/async, reference-input/no-reference, batch/single, local/cloud, or short/long input."
+        }
+      ]
+    }
+  ]
+}

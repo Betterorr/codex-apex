@@ -1,0 +1,4 @@
+interface:
+  display_name: "GOAL Project Orchestrator"
+  short_description: "Choose the next workflow from current project state."
+  default_prompt: "Continue from the current project state and run the right local GOAL skill."

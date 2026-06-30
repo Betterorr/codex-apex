@@ -1,0 +1,50 @@
+{
+  "message_id": "msg-YYYYMMDD-001",
+  "from_agent": "主调度泳道",
+  "to_agent": "开发泳道",
+  "task_type": "implementation_request",
+  "related_goal": "GOAL-ID-OR-SHORT-NAME",
+  "language_policy": "中文优先；status、task_type、message_id、thread_id、file path、命令、API 名、JSON key 保留英文或原文。",
+  "risk_level": "low_risk | medium_risk | high_risk",
+  "objective": "写清楚一个具体交付结果。",
+  "context_paths": [
+    "docs/00-project-state.md",
+    "docs/03-dev-plan.md"
+  ],
+  "acceptance_criteria": [
+    "验收标准 1",
+    "验收标准 2",
+    "验收标准 3"
+  ],
+  "constraints": [
+    "不要修改无关文件。",
+    "没有明确授权不要调用付费 API。",
+    "验收未通过前不要声明 production-ready。"
+  ],
+  "allowed_write_scope": [
+    "src/",
+    "tests/"
+  ],
+  "required_evidence": [
+    "变更文件列表",
+    "验证命令和结果",
+    "如果生成产物，提供产物路径"
+  ],
+  "expected_reply": "DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | BLOCKED",
+  "completion_callback_required": true,
+  "completion_callback_target": {
+    "to_agent": "orchestrator",
+    "to_thread_id": "THREAD-ID-FROM-agent-registry.json",
+    "fallback_log": "agent-lanes/message-log.jsonl"
+  },
+  "reply_format": {
+    "status": "DONE",
+    "summary": "简短说明完成结果。",
+    "changed_files": [],
+    "evidence": [],
+    "concerns": [],
+    "next_recommended_lane": "",
+    "next_recommended_action": ""
+  },
+  "created_at": "YYYY-MM-DDTHH:mm:ss+08:00"
+}

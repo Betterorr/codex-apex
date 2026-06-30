@@ -1,0 +1,20 @@
+{
+  "message_id": "msg-YYYYMMDD-001-reply",
+  "reply_to": "msg-YYYYMMDD-001",
+  "from_agent": "规划泳道 | 设计泳道 | 开发泳道 | 守门泳道 | 验收泳道 | 进化泳道",
+  "to_agent": "主调度泳道",
+  "to_thread_id": "<ORCHESTRATOR_THREAD_ID_OR_PENDING_SETUP>",
+  "task_type": "completion_callback",
+  "related_goal": "GOAL-ID-OR-SHORT-NAME",
+  "delivery_mode": "post_office_thread_prompt_required",
+  "language_policy": "中文优先；status、task_type、message_id、thread_id、file path、命令、API 名、JSON key 和错误原文可保留英文或原文。",
+  "status": "DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | BLOCKED",
+  "summary": "一句话说明完成了什么。",
+  "changed_files": [],
+  "evidence": [],
+  "concerns": [],
+  "next_recommended_lane": "planning | design | development | guardian | review | evolution | orchestrator | none",
+  "next_recommended_action": "建议主调度下一步做什么。",
+  "created_at": "YYYY-MM-DDTHH:mm:ss+08:00",
+  "delivery_rule": "完成后必须调用 agent-lanes/scripts/deliver_callback.py；只有脚本返回 send_required=true、target_thread_id 和完整 thread_prompt 后，才发送这一条 thread_prompt。send_required=false、spooled_waiting、spooled 或 batched_log 均不算送达。"
+}
