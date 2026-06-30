@@ -1,34 +1,21 @@
 ﻿# Agent Lanes 初始化提示词
 
-把 `docs/agent-lanes-working-copy/` 这个模板文件夹复制到另一个项目后，可以把下面这段提示词发给 Codex，让它在目标项目里初始化整套 Agent Lanes 机制。
+把 `agent-lanes-goal-integrated-template/` 这个模板文件夹复制到另一个项目后，可以把下面这段提示词发给 Codex，让它在目标项目里初始化整套 Agent Lanes 机制。默认不需要填写项目名：Codex 当前工作目录就是目标项目根目录，当前文件夹名就是项目名。
 
 ## 使用方式
 
-先替换占位符：
-
-- `<TARGET_PROJECT_ROOT>`: 目标项目根目录，例如 `D:\00-antigravity\NewProject`
-- `<TEMPLATE_DIR>`: 复制过去的 Agent Lanes 模板目录，例如 `D:\00-antigravity\NewProject\docs\agent-lanes`
-- `<PROJECT_NAME>`: 项目名，例如 `NewProject`
-- `<PRIMARY_MODULE>`: 主要代码模块目录，例如 `webapp`、`shoplens`、`src`；如果没有就写 `.`。
-
-然后把完整提示词发给 Codex。
+如果模板位于 `docs/agent-lanes-goal-integrated-template/`，直接把完整提示词发给 Codex。非默认路径时，只需要告诉 Codex 实际模板目录。
 
 ## 可复制提示词
 
 ```text
 你现在在 Codex 里工作。请在这个项目中初始化一套 Agent Lanes 多泳道协作机制。
 
-目标项目根目录：
-<TARGET_PROJECT_ROOT>
-
-模板目录：
-<TEMPLATE_DIR>
-
-项目名：
-<PROJECT_NAME>
-
-主要模块目录：
-<PRIMARY_MODULE>
+默认假设：
+- 当前 Codex 工作目录就是目标项目根目录。
+- 当前项目文件夹名就是项目名。
+- 模板目录在 docs/agent-lanes-goal-integrated-template。
+- 主要模块目录先使用 .。
 
 请按以下要求执行：
 

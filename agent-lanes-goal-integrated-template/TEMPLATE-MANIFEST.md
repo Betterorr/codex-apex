@@ -59,7 +59,7 @@
 
 模板部署到新项目后，至少要完成这些检查：
 
-1. 可选运行 `python <TEMPLATE_DIR>\scripts\deploy_agent_lanes_template.py --target-root <TARGET_PROJECT_ROOT> --template-dir <TEMPLATE_DIR> --project-name <PROJECT_NAME> --primary-module <PRIMARY_MODULE> --orchestrator-thread-id <ORCHESTRATOR_THREAD_ID>`。
+1. 可选运行 `python .\docs\agent-lanes-goal-integrated-template\scripts\deploy_agent_lanes_template.py`。脚本默认使用当前工作目录作为目标项目根目录、当前文件夹名作为项目名、`.` 作为主要模块目录、`pending_setup` 作为主调度线程 id；非默认模板路径才需要补 `--template-dir`。
 2. `python agent-lanes\scripts\render_dashboard.py`
 3. `python -m py_compile agent-lanes\scripts\render_dashboard.py agent-lanes\scripts\deliver_callback.py agent-lanes\scripts\callback_post_office.py agent-lanes\scripts\check_callback_post_office.py`
 4. `powershell -ExecutionPolicy Bypass -File scripts\check-agent-lanes-post-office.ps1`

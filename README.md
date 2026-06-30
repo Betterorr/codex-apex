@@ -47,30 +47,22 @@ your-project/
 
 ### 2. Paste This Prompt Into Codex
 
-Replace the placeholders, then paste the whole block into Codex while Codex is opened in your target project.
+Paste the whole block into Codex while Codex is opened in your target project. If the template is under `docs/agent-lanes-goal-integrated-template/`, there are no required placeholders.
 
 ```text
 你现在在 Codex 里工作。请把 Agent Lanes + GOAL 开发基座模板部署到当前项目。
 
-目标项目根目录：
-<TARGET_PROJECT_ROOT>
+默认假设：
+- 当前 Codex 工作目录就是目标项目根目录。
+- 当前项目文件夹名就是项目名。
+- 模板目录在 docs/agent-lanes-goal-integrated-template。
+- 主要模块目录先使用 .。
+- 主调度线程 id 先使用 pending_setup。
 
-模板目录：
-<TARGET_PROJECT_ROOT>/docs/agent-lanes-goal-integrated-template
-
-项目名：
-<PROJECT_NAME>
-
-主要模块目录：
-<PRIMARY_MODULE>
-
-主调度线程 id：
-pending_setup
-
-请先读取模板目录里的 DEPLOY-PROMPT.md、TEMPLATE-MANIFEST.md、README-GOAL-INTEGRATED.md 和 goal-development-base/AGENTS.md。
+请先读取模板目录里的 DEPLOY-PROMPT.md、TEMPLATE-MANIFEST.md、README-GOAL-INTEGRATED.md 和 goal-development-base/AGENTS.md，理解这个模板会创建什么运行态。
 
 然后优先运行：
-python "<TARGET_PROJECT_ROOT>\docs\agent-lanes-goal-integrated-template\scripts\deploy_agent_lanes_template.py" --target-root "<TARGET_PROJECT_ROOT>" --template-dir "<TARGET_PROJECT_ROOT>\docs\agent-lanes-goal-integrated-template" --project-name "<PROJECT_NAME>" --primary-module "<PRIMARY_MODULE>" --orchestrator-thread-id pending_setup
+python ".\docs\agent-lanes-goal-integrated-template\scripts\deploy_agent_lanes_template.py"
 
 部署要求：
 - 不要删除文件。
@@ -82,6 +74,8 @@ python "<TARGET_PROJECT_ROOT>\docs\agent-lanes-goal-integrated-template\scripts\
 
 部署完成后，请把 agent-lanes/dashboard.md 作为主入口，把 agent-lanes/message-log.jsonl、各 lane 的 worklog.md 和 completion callback 作为追溯记录。
 ```
+
+If you placed the template somewhere else, tell Codex the path and use the optional `--template-dir` argument.
 
 The full deployment prompt lives in:
 
@@ -129,9 +123,8 @@ Codex is strongest when project context, execution boundaries, evidence, and fol
 
 1. Copy `agent-lanes-goal-integrated-template/` into the target project, preferably under `docs/`.
 2. Open `agent-lanes-goal-integrated-template/DEPLOY-PROMPT.md`.
-3. Replace the placeholders with the target project paths and thread IDs.
-4. Paste the prompt into Codex in the target project.
-5. Review the generated runtime files, especially `agent-lanes/dashboard.md`, `agent-lanes/message-log.jsonl`, and each lane worklog.
+3. Paste the minimal prompt into Codex from the target project root.
+4. Review the generated runtime files, especially `agent-lanes/dashboard.md`, `agent-lanes/message-log.jsonl`, and each lane worklog.
 
 For the GOAL-integrated version, start with:
 
@@ -168,7 +161,7 @@ The original template content is Chinese-first because it was built for Chinese 
 
 ## Current Status
 
-This repository is in its first open-source packaging pass. The template is usable today as a Chinese-first canonical operating template with English public entry points.
+This repository is in its first open-source packaging pass. The template is usable today as a Chinese-first canonical operating template with English public entry points and a minimal bootstrap prompt.
 
 ## License
 

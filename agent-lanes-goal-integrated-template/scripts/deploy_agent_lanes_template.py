@@ -101,17 +101,22 @@ def build_registry(project_name: str, primary_module: str, orchestrator_thread_i
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Deploy Agent Lanes template into a target project.")
-    parser.add_argument("--target-root", required=True, help="Target project root.")
+    parser.add_argument("--target-root", default=None, help="Target project root. Defaults to the current working directory.")
     parser.add_argument("--template-dir", default=None, help="Template directory. Defaults to parent of this script dir.")
-    parser.add_argument("--project-name", required=True)
+    parser.add_argument("--project-name", default=None, help="Project name. Defaults to the target root folder name.")
     parser.add_argument("--primary-module", default=".")
     parser.add_argument("--orchestrator-thread-id", default="pending_setup")
     parser.add_argument("--overwrite-runtime", action="store_true", help="Overwrite existing runtime template/script files.")
     args = parser.parse_args()
 
-    target = Path(args.target_root).resolve()
+    target = Path(args.target_root).resolve() if args.target_root else Path.cwd().resolve()
     template = Path(args.template_dir).resolve() if args.template_dir else Path(__file__).resolve().parents[1]
+    project_name = args.project_name or target.name
     report: list[str] = []
+    report.append(f"TARGET_ROOT {target}")
+    report.append(f"TEMPLATE_DIR {template}")
+    report.append(f"PROJECT_NAME {project_name}")
+    report.append(f"PRIMARY_MODULE {args.primary_module}")
 
     agent_lanes = target / "agent-lanes"
     callback_inbox = agent_lanes / "callback-inbox"
@@ -168,7 +173,7 @@ def main() -> int:
 
     registry_path = agent_lanes / "agent-registry.json"
     if not registry_path.exists():
-        registry = build_registry(args.project_name, args.primary_module, args.orchestrator_thread_id)
+        registry = build_registry(project_name, args.primary_module, args.orchestrator_thread_id)
         registry_path.write_text(json.dumps(registry, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         report.append(f"CREATE {registry_path}")
     else:
@@ -203,6 +208,24 @@ def main() -> int:
     with message_log.open("a", encoding="utf-8", newline="\n") as handle:
         handle.write(json.dumps(bootstrap_event, ensure_ascii=False) + "\n")
     report.append(f"APPEND {message_log}")
+
+    dashboard = agent_lanes / "dashboard.md"
+    write_if_missing(
+        dashboard,
+        f"# Agent Lanes Dashboard\n\n"
+        f"- Project: `{project_name}`\n"
+        f"- Status: `bootstrap_initialized`\n"
+        f"- Created at: `{iso_now()}`\n"
+        f"- Registry: `agent-lanes/agent-registry.json`\n"
+        f"- Message log: `agent-lanes/message-log.jsonl`\n"
+        f"- Install report: `agent-lanes/INSTALL-REPORT.md`\n\n"
+        f"## Lanes\n\n"
+        + "\n".join(f"- `{lane_id}`: {display_name}" for lane_id, display_name in LANES)
+        + "\n\n"
+        f"## Next Step\n\n"
+        f"Run `python agent-lanes/scripts/render_dashboard.py` after the first lane messages or completion callbacks are recorded.\n",
+        report,
+    )
 
     snippet = target / "agent-lanes" / "AGENTS.agent-lanes-snippet.md"
     write_if_missing(

@@ -1,34 +1,27 @@
 # Agent Lanes 模板包一键部署提示词
 
-把本模板目录复制到目标项目后，打开目标项目里的 Codex，粘贴下面这段提示词即可。先替换尖括号占位符。
+把本模板目录复制到目标项目后，打开目标项目里的 Codex，粘贴下面这段提示词即可。默认不需要填写项目名：Codex 当前工作目录就是目标项目根目录，当前文件夹名就是项目名。
 
-## 需要替换
+## 默认路径
 
-- `<TARGET_PROJECT_ROOT>`：目标项目根目录，例如 `D:\00-antigravity\NewProject`
-- `<TEMPLATE_DIR>`：模板包目录，例如 `D:\00-antigravity\NewProject\docs\agent-lanes-goal-integrated-template`
-- `<PROJECT_NAME>`：项目名
-- `<PRIMARY_MODULE>`：主要代码目录；没有就写 `.`
-- `<ORCHESTRATOR_THREAD_ID>`：已有主调度线程 id；没有就写 `pending_setup`
+- 模板目录：`docs/agent-lanes-goal-integrated-template`
+- 项目名：从当前项目文件夹名自动推断
+- 主要模块目录：默认 `.`
+- 主调度线程 id：默认 `pending_setup`
+
+如果你的模板目录不是默认路径，只需要在提示词里告诉 Codex 实际模板目录，并让它给脚本补 `--template-dir`。
 
 ## 可复制提示词
 
 ```text
 你现在在 Codex 里工作。请把 Agent Lanes + GOAL 开发基座模板部署到当前项目。
 
-目标项目根目录：
-<TARGET_PROJECT_ROOT>
-
-模板目录：
-<TEMPLATE_DIR>
-
-项目名：
-<PROJECT_NAME>
-
-主要模块目录：
-<PRIMARY_MODULE>
-
-主调度线程 id：
-<ORCHESTRATOR_THREAD_ID>
+默认假设：
+- 当前 Codex 工作目录就是目标项目根目录。
+- 当前项目文件夹名就是项目名。
+- 模板目录在 docs/agent-lanes-goal-integrated-template。
+- 主要模块目录先使用 .。
+- 主调度线程 id 先使用 pending_setup。
 
 请严格按以下步骤执行，不要改业务代码，不要删除文件。
 
@@ -55,8 +48,8 @@
     - SKILL-RECOMMENDATIONS.md
 
 2. 优先使用部署辅助脚本做保守初始化：
-   `python <TEMPLATE_DIR>\scripts\deploy_agent_lanes_template.py --target-root <TARGET_PROJECT_ROOT> --template-dir <TEMPLATE_DIR> --project-name <PROJECT_NAME> --primary-module <PRIMARY_MODULE> --orchestrator-thread-id <ORCHESTRATOR_THREAD_ID>`
-   脚本默认不覆盖已有运行态文件。运行后读取 `agent-lanes/INSTALL-REPORT.md`，确认没有缺失模板文件。
+   `python .\docs\agent-lanes-goal-integrated-template\scripts\deploy_agent_lanes_template.py`
+   脚本会默认使用当前工作目录作为目标项目根目录、当前文件夹名作为项目名、`.` 作为主要模块目录、`pending_setup` 作为主调度线程 id，并且默认不覆盖已有运行态文件。运行后读取 `agent-lanes/INSTALL-REPORT.md`，确认没有缺失模板文件。
 
 3. 如果不能运行部署脚本，再手动创建或补齐运行态目录：
    - `agent-lanes/`

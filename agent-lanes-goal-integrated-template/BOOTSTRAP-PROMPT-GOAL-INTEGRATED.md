@@ -1,30 +1,25 @@
 # Agent Lanes + GOAL Integrated Bootstrap Prompt
 
-把 `agent-lanes-goal-integrated-template/` 复制到另一个项目后，替换下面占位符，然后把整段提示词发给 Codex。
+把 `agent-lanes-goal-integrated-template/` 复制到另一个项目后，打开目标项目里的 Codex，把下面整段提示词发给 Codex。默认不需要填写项目名：Codex 当前工作目录就是目标项目根目录，当前文件夹名就是项目名。
 
-## 占位符
+## 默认值
 
-- `<TARGET_PROJECT_ROOT>`：目标项目根目录，例如 `D:\00-antigravity\NewProject`
-- `<TEMPLATE_DIR>`：复制过去的集成模板目录，例如 `D:\00-antigravity\NewProject\docs\agent-lanes-goal-integrated-template`
-- `<PROJECT_NAME>`：项目名，例如 `NewProject`
-- `<PRIMARY_MODULE>`：主要代码目录，例如 `src`、`webapp`、`shoplens`；没有就填 `.`
+- 模板目录：`docs/agent-lanes-goal-integrated-template`
+- 项目名：从当前项目文件夹名自动推断
+- 主要代码目录：默认 `.`
+- 主调度线程 id：默认 `pending_setup`
 
 ## 可复制提示词
 
 ```text
 你现在在 Codex 里工作。请在当前项目中初始化一套 Agent Lanes + GOAL Development Base 集成机制。
 
-目标项目根目录：
-<TARGET_PROJECT_ROOT>
-
-集成模板目录：
-<TEMPLATE_DIR>
-
-项目名：
-<PROJECT_NAME>
-
-主要代码模块：
-<PRIMARY_MODULE>
+默认假设：
+- 当前 Codex 工作目录就是目标项目根目录。
+- 当前项目文件夹名就是项目名。
+- 集成模板目录在 docs/agent-lanes-goal-integrated-template。
+- 主要代码模块先使用 .。
+- 主调度线程 id 先使用 pending_setup。
 
 目标：
 把模板中的多 Agent 泳道体系和 GOAL 本地 skills 装配到目标项目，让后续 Codex 可以通过自然语言自动选择 GOAL skills，并通过 Agent Lanes 进行多线程协作、派发、完成回报和 dashboard 汇总。

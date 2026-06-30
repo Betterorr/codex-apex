@@ -20,30 +20,22 @@ agent-lanes-goal-integrated-template/
 
 ### 可复制启动提示词
 
-把尖括号占位符替换成你的项目路径和项目名，然后整段复制给 Codex：
+如果模板放在 `docs/agent-lanes-goal-integrated-template/`，下面这段可以直接复制给 Codex，不需要填写项目名。Codex 当前所在的项目文件夹名就是项目名。
 
 ```text
 你现在在 Codex 里工作。请把 Agent Lanes + GOAL 开发基座模板部署到当前项目。
 
-目标项目根目录：
-<TARGET_PROJECT_ROOT>
+默认假设：
+- 当前 Codex 工作目录就是目标项目根目录。
+- 当前项目文件夹名就是项目名。
+- 模板目录在 docs/agent-lanes-goal-integrated-template。
+- 主要模块目录先使用 .。
+- 主调度线程 id 先使用 pending_setup。
 
-模板目录：
-<TARGET_PROJECT_ROOT>/docs/agent-lanes-goal-integrated-template
-
-项目名：
-<PROJECT_NAME>
-
-主要模块目录：
-<PRIMARY_MODULE>
-
-主调度线程 id：
-pending_setup
-
-请先读取模板目录里的 DEPLOY-PROMPT.md、TEMPLATE-MANIFEST.md、README-GOAL-INTEGRATED.md 和 goal-development-base/AGENTS.md。
+请先读取模板目录里的 DEPLOY-PROMPT.md、TEMPLATE-MANIFEST.md、README-GOAL-INTEGRATED.md 和 goal-development-base/AGENTS.md，理解这个模板会创建什么运行态。
 
 然后优先运行：
-python "<TARGET_PROJECT_ROOT>\docs\agent-lanes-goal-integrated-template\scripts\deploy_agent_lanes_template.py" --target-root "<TARGET_PROJECT_ROOT>" --template-dir "<TARGET_PROJECT_ROOT>\docs\agent-lanes-goal-integrated-template" --project-name "<PROJECT_NAME>" --primary-module "<PRIMARY_MODULE>" --orchestrator-thread-id pending_setup
+python ".\docs\agent-lanes-goal-integrated-template\scripts\deploy_agent_lanes_template.py"
 
 部署要求：
 - 不要删除文件。
@@ -55,6 +47,8 @@ python "<TARGET_PROJECT_ROOT>\docs\agent-lanes-goal-integrated-template\scripts\
 
 部署完成后，请把 agent-lanes/dashboard.md 作为主入口，把 agent-lanes/message-log.jsonl、各 lane 的 worklog.md 和 completion callback 作为追溯记录。
 ```
+
+如果模板没有放在默认路径，只需要告诉 Codex 模板目录，并使用脚本的可选参数 `--template-dir`。
 
 更完整的部署提示词在：
 
@@ -75,9 +69,8 @@ agent-lanes-goal-integrated-template/DEPLOY-PROMPT.md
 
 1. 把 `agent-lanes-goal-integrated-template/` 复制到目标项目。
 2. 打开 `agent-lanes-goal-integrated-template/DEPLOY-PROMPT.md`。
-3. 替换目标项目路径、项目名、主调度线程 id 等占位符。
-4. 把提示词发给目标项目里的 Codex。
-5. 部署后优先看 `agent-lanes/dashboard.md`、`agent-lanes/message-log.jsonl` 和各泳道 `worklog.md`。
+3. 在目标项目根目录的 Codex 里粘贴一键启动提示词。
+4. 部署后优先看 `agent-lanes/dashboard.md`、`agent-lanes/message-log.jsonl` 和各泳道 `worklog.md`。
 
 如果要使用 GOAL 集成版，优先阅读：
 
