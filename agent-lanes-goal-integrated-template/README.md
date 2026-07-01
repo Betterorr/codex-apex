@@ -11,7 +11,9 @@ Agent Lanes 是一套通用的 Codex 多 Agent 项目协作方法：把长期项
 - `scripts/deploy_agent_lanes_template.py`：保守部署辅助脚本，默认不覆盖已有运行态文件。
 - `callback-inbox/post-office-policy.json`：邮局直投策略模板。
 - `scripts/deliver_callback.py`、`scripts/callback_post_office.py`、`scripts/check_callback_post_office.py`：完成回报统一投递和门禁脚本。
-- `goal-development-base/.agents/skills/`：随包交付的 GOAL 本地 skill，其中已吸收 `requirements-traceability`、`interface-design` + `frontend-design`、`github-research` 和系统化调试方法为项目适配版 runner。
+- `goal-development-base/.agents/skills/`：随包交付的 GOAL 本地 skill，其中已吸收 `requirements-traceability`、`interface-design` + `frontend-design`、`github-research`、系统化调试方法和泳道恢复方法为项目适配版 runner。
+
+机制 skill 必须项目本地化：复制到目标项目 `.agents/skills/` 后使用。公共 skill 目录只能作为方法来源或验证器来源，不作为目标项目机制 skill 的最终安装位置。
 
 邮局回报机制是当前默认通信方式：非主调度泳道完成后不直接发短 wake，而是调用 `deliver_callback.py`。当脚本输出 `send_required=true` 时，泳道只把返回的 `thread_prompt` 发送给主调度线程一次。若脚本输出 `send_required=false`、`spooled_waiting`，或只留下 `spooled`/`batched_log`，说明回报尚未真正送达，必须重跑投递或记录阻塞。`message-log.jsonl` 只作为审计备份；主调度收到 `【邮局合并回报】` 后直接处理原文，不先要求去收件箱读取完整 callback。
 
@@ -44,6 +46,8 @@ docs/agent-lanes/
   review-protocol.md
   LANE-GOAL-SKILL-MAP.md
   LANE-SKILL-HOOK-MATRIX.md
+  PERSISTENT-RUNTIME-FILES.md
+  orchestrator-recovery-template.md
   SKILL-RECOMMENDATIONS.md
   tooling-notes.md
   goal-development-base/.agents/skills/

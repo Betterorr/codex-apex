@@ -7,10 +7,6 @@ description: 当用户提到代码审查、code review、review 代码、看 dif
 
 目标：作为没有参与实现的独立视角，对代码改动进行代码级审查，并把阻塞问题打回修复。
 
-## 项目文档中文优先
-
-更新 `docs/*.md`、`agent-lanes/**/*.md`、泳道 worklog、dashboard、GOAL log、review/release/report 正文或模板说明时，默认写中文。专有名词、代码、命令、路径、API 名、JSON key、状态枚举、错误原文和外部引用标题可以保留英文或原文。
-
 ## 自然语言触发词
 
 用户提到这些词或表达时，优先使用本 Skill：
@@ -34,6 +30,10 @@ description: 当用户提到代码审查、code review、review 代码、看 dif
 ## 核心契约
 
 代码审查不是总结改了什么，而是验证“改动是否真的满足 GOAL，且没有引入可预见风险”。审查必须问题优先，不能替实现者找借口。
+
+## 项目文档中文优先
+
+更新 `docs/*.md`、`agent-lanes/**/*.md`、泳道 worklog、dashboard、GOAL log、review/release/report 正文或模板说明时，默认写中文。专有名词、品牌、代码、命令、路径、API 名、JSON key、状态枚举、错误原文、许可证原文和外部引用标题可以保留英文或原文。审查文档改动时，如果用户可读正文大量使用英文，应作为文档漂移风险提出。
 
 ## 子 Agent 安排
 

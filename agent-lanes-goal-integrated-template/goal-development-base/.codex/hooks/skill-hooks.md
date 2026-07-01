@@ -24,6 +24,7 @@
 | `frontend-quality-runner` | 前端体验质量、UI 质感、信息架构、页面可读性、文本溢出、浏览器截图验收、dashboard 好不好用、研究工作台好不好用、移动端适配 |
 | `open-source-research-runner` | GitHub 调研、开源库选型、找资源、找实现、github-research、provider 候选、回测框架、图表库、金融数据源、license 评估 |
 | `systematic-debugging-runner` | bug、报错、测试失败、构建失败、信息流断了、callback 没送到、门禁异常、数据接线不对、先查根因、root cause、系统化调试 |
+| `lane-recovery-runner` | 泳道坏了、主调度坏了、线程崩了、线程死了、旧线程太长、failed to start turn、agent loop died unexpectedly、Error submitting message、新建泳道替换、注册替换、接管旧泳道、恢复接管、替换 thread_id、更新 registry、旧线程归档、新线程沿用原名字、主调度恢复、orchestrator recovery、坏掉的 lane recovery |
 
 ## 讨论场景 Hook 矩阵
 
@@ -43,6 +44,7 @@
 | 讨论前端质感、页面可读性、信息架构或浏览器截图验收 | `frontend-quality-runner` | `design`, `development` 或 `review` | `docs/02-design-brief.md`, `docs/05-review-report.md`, `artifacts/<slice>/` | 用户可见 UI、dashboard、研究工作台或截图证据不足时派发 |
 | 讨论开源库、GitHub 资源、provider 候选或外部实现选型 | `open-source-research-runner`; 涉及引入代码/依赖时加 `gate-runner` 或 `guardian` | `planning` 或 `guardian` | `docs/08-open-source-reference-pool.md`, `docs/09-research-roadmap.md`, `docs/capability-status.json`, 泳道 workspace | 需要比较维护度、license、依赖复杂度和集成边界时派发 |
 | 讨论 bug、信息流断点、门禁异常、callback 投递异常或需要根因定位 | `systematic-debugging-runner`; 修复代码时再接 `bug-fixer` | `development`, `review` 或 `evolution` | `docs/04-goal-log.md`, 相关泳道 `worklog.md`, `docs/05-review-report.md`, `artifacts/<slice>/` | 需要复现、数据流追踪、单假设验证和同路径回归时派发 |
+| 讨论泳道线程崩溃、旧线程过长、主调度无法提交消息、需要新建线程替换和 registry 接管 | `lane-recovery-runner`; 若暴露可复用机制缺口再接 `evolution-runner` | `orchestrator` 或对应故障泳道，必要时 `evolution` | `agent-lanes/agent-registry.json`, `agent-lanes/message-log.jsonl`, 对应泳道 `worklog.md`, `agent-lanes/lanes/<lane>/workspace/lane-recovery-*.md`, `agent-lanes/dashboard.md` | 已确认某条泳道线程不可用、过长、需要归档旧线程或替换 `thread_id` 时执行 |
 
 Hook 结果必须归入四类：
 

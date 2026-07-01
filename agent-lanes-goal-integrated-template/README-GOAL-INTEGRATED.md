@@ -15,6 +15,8 @@ agent-lanes-goal-integrated-template/
   BOOTSTRAP-PROMPT-GOAL-INTEGRATED.md
   LANE-GOAL-SKILL-MAP.md
   LANE-SKILL-HOOK-MATRIX.md
+  PERSISTENT-RUNTIME-FILES.md
+  orchestrator-recovery-template.md
   agent-lanes.template.md
   agent-registry.schema.json
   message-template.json

@@ -83,6 +83,14 @@ The full deployment prompt lives in:
 agent-lanes-goal-integrated-template/DEPLOY-PROMPT.md
 ```
 
+Recovery and persistence references:
+
+```text
+agent-lanes-goal-integrated-template/PERSISTENT-RUNTIME-FILES.md
+agent-lanes-goal-integrated-template/orchestrator-recovery-template.md
+agent-lanes-goal-integrated-template/goal-development-base/.agents/skills/lane-recovery-runner/SKILL.md
+```
+
 ### What Codex Will Create
 
 After deployment, your target project should gain a runtime structure like:
@@ -117,7 +125,8 @@ Codex is strongest when project context, execution boundaries, evidence, and fol
 - where decisions and worklogs live,
 - how completion callbacks are delivered,
 - which gates must stop for user confirmation,
-- how review and evolution feed back into the system.
+- how review and evolution feed back into the system,
+- how a new orchestrator or lane thread can recover from persistent runtime files when an old thread is too long or fails.
 
 ## Quick Start
 

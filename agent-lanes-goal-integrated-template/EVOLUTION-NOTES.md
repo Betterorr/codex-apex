@@ -33,6 +33,8 @@ This copy includes:
 - `README-GOAL-INTEGRATED.md`.
 - `LANE-GOAL-SKILL-MAP.md`.
 - `LANE-SKILL-HOOK-MATRIX.md`.
+- `PERSISTENT-RUNTIME-FILES.md`.
+- `orchestrator-recovery-template.md`.
 - `BOOTSTRAP-PROMPT-GOAL-INTEGRATED.md`.
 
 Intent:

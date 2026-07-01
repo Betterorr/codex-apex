@@ -40,6 +40,11 @@
 | `dev-builder` | 开发执行 | 代码、验证证据、GOAL log |
 | `bug-fixer` | 缺陷闭环 | 复现、根因、修复、回归验证 |
 | `code-reviewer` | 代码审查 | bug、测试缺口、代码风险、文档漂移 |
+| `requirements-traceability-runner` | 需求追踪 | 需求、设计、实现、验证和证据映射 |
+| `frontend-quality-runner` | 前端质量 | 信息架构、页面状态、截图验收和可读性检查 |
+| `open-source-research-runner` | 开源调研 | 候选库、license、维护度、依赖和守门边界 |
+| `systematic-debugging-runner` | 系统化调试 | 复现、数据流追踪、单假设验证和同路径回归 |
+| `lane-recovery-runner` | 泳道恢复 | 新线程接管、registry 替换、旧线程归档和审计记录 |
 | `review-runner` | 独立审查 | `docs/05-review-report.md` |
 | `release-builder` | 发布交付 | `docs/06-release-record.md` |
 | `evolution-runner` | 自进化 | 规则/模板/Skill 更新建议 |
@@ -56,7 +61,7 @@ powershell -ExecutionPolicy Bypass -File scripts/validate-skills.ps1
 powershell -ExecutionPolicy Bypass -File scripts/check-skill-mechanism.ps1
 ```
 
-其中 `check-skill-mechanism.ps1` 会检查 12 个本地 Skill 是否包含核心契约、输出、完成门禁、打回/判断条件、signal 机制，以及各自环节的关键能力。
+其中 `check-skill-mechanism.ps1` 会检查 19 个本地 Skill 是否包含核心契约、输出、完成门禁、打回/判断条件、signal 机制，以及各自环节的关键能力。
 
 具体项目复制本包后，还应根据技术栈继续把 `.codex/gates/` 中的门禁扩展成真实构建、测试、类型检查、浏览器验收或发布检查。
 

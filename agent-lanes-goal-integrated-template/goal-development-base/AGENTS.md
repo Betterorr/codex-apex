@@ -118,6 +118,8 @@ GOAL -> clarify -> plan -> build -> verify -> independent review -> document -> 
 
 任务匹配时，优先使用 `.agents/skills/` 里的本地 Skill：
 
+所有用于维护当前项目 GOAL / Agent Lanes 机制运作的 Skill 都必须项目本地化：默认创建、改造和读取位置是 `.agents/skills/<skill-name>/`。`C:\Users\...\ .codex\skills` 或其他公共 Skill 目录只能作为方法来源、验证器来源或临时参考，不能作为当前项目机制 Skill 的最终安装位置。若从公共 Skill、外部 Skill 或系统 Skill 吸收方法，必须改造成项目内本地版，产物回写当前项目 `docs/`、`agent-lanes/`、`.codex/` 或泳道 workspace，并同步到可移植模板。
+
 - `project-orchestrator`: 用户说“下一步/继续”时，先读项目状态，再综合选择合适的本地 Skill 推进闭环。
 - `product-spec-builder`: 把模糊想法逼问成 `docs/01-product-spec.md`。
 - `design-brief-builder`: 把产品意图转成 `docs/02-design-brief.md`。
@@ -134,6 +136,7 @@ GOAL -> clarify -> plan -> build -> verify -> independent review -> document -> 
 - `frontend-quality-runner`: 只吸收 `interface-design` 和 `frontend-design` 两个前端设计来源，把信息架构、页面状态、截图验收和可读性问题写回 `docs/02-design-brief.md`、`docs/05-review-report.md` 或 `artifacts/`。
 - `open-source-research-runner`: 吸收 `github-research` 和开源分析方法，把开源候选、license、维护度、依赖和守门边界写回 `docs/08-open-source-reference-pool.md`、`docs/09-research-roadmap.md` 或泳道 workspace。
 - `systematic-debugging-runner`: 吸收系统化调试方法，要求复现、数据流追踪、单假设验证和同路径回归，并把结论写回 `docs/04-goal-log.md`、相关泳道 worklog、`docs/05-review-report.md` 或 artifact。
+- `lane-recovery-runner`: 当泳道线程崩溃、过长、无法提交消息或需要新建替换时，基于持久化运行态文件完成新线程创建、registry 更新、旧线程归档、恢复提示词投递和审计记录。
 - `evolution-runner`: 在明确边界内把真实失败、用户纠正和稳定项目约束变化转成对本地 Skill、hook、门禁和项目规则的改进。
 - `goal-methodology-guide`: 解释和维护 GOAL 方法论、Skill 使用时机、脚本门禁、自进化和子 Agent 规则。
 

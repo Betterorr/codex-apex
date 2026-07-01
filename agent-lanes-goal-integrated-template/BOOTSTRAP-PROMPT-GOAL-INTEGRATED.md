@@ -30,6 +30,8 @@
    - README-GOAL-INTEGRATED.md
    - LANE-GOAL-SKILL-MAP.md
    - LANE-SKILL-HOOK-MATRIX.md
+   - PERSISTENT-RUNTIME-FILES.md
+   - orchestrator-recovery-template.md
    - agent-lanes.template.md
    - agent-registry.schema.json
    - message-template.json
@@ -49,6 +51,7 @@
    - 如果目标项目没有 `AGENTS.md`，从 `goal-development-base/AGENTS.md` 创建。
    - 如果目标项目已有 `AGENTS.md`，不要覆盖；在文件末尾追加一个 `GOAL + Agent Lanes` 集成段，保留原规则，冲突时采用更严格规则。
    - 创建或补齐 `.agents/skills/`，只复制缺失的 GOAL skill 目录。
+   - 所有维护当前项目 GOAL / Agent Lanes 机制运作的 skill 都必须项目本地化，最终落在目标项目 `.agents/skills/<skill-name>/`；不要安装到 `C:\Users\...\ .codex\skills` 或其他公共 skill 目录。公共 skill、系统 skill、外部 skill 只能作为方法来源，必须改造成目标项目内本地版后才能进入默认流程。
    - 创建或补齐 `.codex/hooks/`、`.codex/gates/`、`.codex/goals/`、`.codex/signals/`、`.codex/subagents/`，只复制缺失文件。
    - 创建或补齐 `docs/00-project-state.md`、`docs/01-product-spec.md`、`docs/02-design-brief.md`、`docs/03-dev-plan.md`、`docs/04-goal-log.md`、`docs/05-review-report.md`、`docs/06-release-record.md`、`docs/capability-status.json`、`docs/capability-provider-contract.md`、`docs/CHANGELOG.md`；已有同名文件不要覆盖。
    - 创建或补齐 `scripts/` 中缺失的 GOAL 辅助脚本；已有同名脚本不要覆盖。
@@ -91,16 +94,20 @@
    - 只有 `deliver_callback.py` 返回 `send_required=true`、`target_thread_id` 和完整 `thread_prompt` 时，才用 `send_message_to_thread` 把这一条合并原文发给主调度线程。
    - 如果返回 `send_required=false`、`spooled_waiting`，或只生成 `spooled`/`batched_log` 记录，说明回报尚未真正送达；泳道必须重跑投递或记录阻塞，不得短 wake，也不得让主调度去 message-log 自取原文。
    - `agent-lanes/message-log.jsonl` 只作为审计备份和异常查证入口。
+   - `PERSISTENT-RUNTIME-FILES.md` 是线程接管和项目记忆规则：主调度线程可以替换，但 `agent-registry.json`、`message-log.jsonl`、`dashboard.md`、`communications-readable.xlsx`、各泳道 `worklog.md` / `workspace/` 和 GOAL docs 必须保持完整。
+   - 当主调度线程崩溃、过长或无法提交消息时，使用 `orchestrator-recovery-template.md` 生成恢复包，新建主调度线程，更新 `agent-registry.json`，旧线程只保留作历史审计。
    - 主调度应把缺少 callback 的任务视为交接未完成。
 
 7. 把 GOAL skills 映射到泳道职责：
    - 主调度泳道主要使用 `project-orchestrator`；目标、范围、完成标准或验证方式不清时再按需使用 `goal-creator`。
+   - 主调度泳道线程崩溃、过长、无法提交消息或需要新线程接管时，使用 `lane-recovery-runner`，并按 `PERSISTENT-RUNTIME-FILES.md` 与 `orchestrator-recovery-template.md` 更新 registry、归档旧线程和写审计记录。
    - 规划泳道使用 `product-spec-builder`；跨泳道依赖、阶段顺序、联调路线、风险或验证方式不清时再按需使用 `dev-planner`、`goal-creator`。
    - 设计泳道使用 `design-brief-builder`、`prototype-builder`。
    - 开发泳道使用 `dev-builder`、`bug-fixer`、`gate-runner`。
    - 守门泳道使用 `gate-runner`、`code-reviewer`。
    - 验收泳道使用 `review-runner`、`code-reviewer`、`gate-runner`。
    - 进化泳道使用 `evolution-runner`、`goal-methodology-guide`。
+   - 进化泳道在发现泳道恢复流程可复用缺口时，可以配合 `lane-recovery-runner` 把规则同步回模板、hook 和门禁。
    - 低风险任务优先使用结构化泳道派发、completion callback、聚焦门禁和 dashboard 聚合；不要机械串行运行正式 GOAL、完整 dev plan 和完整 review。
 
 8. 建立“连续讨论协同模式”：
@@ -140,6 +147,7 @@
    - 每条泳道都有 worklog 和 workspace。
    - GOAL skill 目录存在于 `.agents/skills/`。
    - `.codex/hooks/skill-hooks.md` 存在。
+   - `.codex/hooks/skill-hooks.md` 包含 `lane-recovery-runner` 触发词，`.codex/gates/skill-mechanism-check.ps1` 会检查该 Skill。
    - `agent-lanes/dashboard.md` 能生成。
    - `communications-readable.xlsx` 能生成，且至少包含中文表头、冻结首行、筛选、合理列宽和自动换行。
 

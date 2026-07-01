@@ -7,10 +7,6 @@ description: 当用户提到设计、设计规范、设计 brief、UI、UX、交
 
 目标：把产品意图、审美偏好和交互要求转成可执行的设计 Brief。
 
-## 项目文档中文优先
-
-更新 `docs/*.md`、`agent-lanes/**/*.md`、泳道 worklog、dashboard、GOAL log、review/release/report 正文或模板说明时，默认写中文。专有名词、品牌、代码、命令、路径、API 名、JSON key、状态枚举、错误原文和外部引用标题可以保留英文或原文。
-
 ## 自然语言触发词
 
 用户提到这些词或表达时，优先使用本 Skill：
@@ -33,6 +29,10 @@ description: 当用户提到设计、设计规范、设计 brief、UI、UX、交
 ## 核心契约
 
 不要停留在“高级感”“简洁”“像某某产品”这种模糊描述。必须把感受翻译成布局、密度、状态、交互、视觉约束和反参考。
+
+## 项目文档中文优先
+
+更新 `docs/*.md`、`agent-lanes/**/*.md`、泳道 worklog、dashboard、GOAL log、review/release/report 正文或模板说明时，默认写中文。专有名词、品牌、代码、命令、路径、API 名、JSON key、状态枚举、错误原文、许可证原文和外部引用标题可以保留英文或原文。
 
 ## 必须澄清的内容
 

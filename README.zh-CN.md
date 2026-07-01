@@ -64,6 +64,15 @@ agent-lanes-goal-integrated-template/DEPLOY-PROMPT.md
 - 用 GOAL Development Base 管单个泳道内部的目标、计划、执行、验证和复盘。
 - 用 message log、worklog、dashboard 和 completion callback 保留可追溯记录。
 - 用 guardian/review/evolution 让权限、风险、验收和规则沉淀有固定位置。
+- 用持久化运行态文件支持主调度或泳道线程恢复：线程可以换，运行态不能丢。
+
+恢复和持久化说明入口：
+
+```text
+agent-lanes-goal-integrated-template/PERSISTENT-RUNTIME-FILES.md
+agent-lanes-goal-integrated-template/orchestrator-recovery-template.md
+agent-lanes-goal-integrated-template/goal-development-base/.agents/skills/lane-recovery-runner/SKILL.md
+```
 
 ## 快速使用
 

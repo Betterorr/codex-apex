@@ -13,13 +13,13 @@
 
 | 泳道 | 默认职责 | 默认 skill | 关键 hook / 用户说法 | 默认产物 |
 | --- | --- | --- | --- | --- |
-| 主调度泳道 `orchestrator` | 读状态、判断下一步、派发泳道、合并 callback、节奏控制 | `project-orchestrator`, `goal-creator`, `goal-methodology-guide` | 下一步、继续、整体推进、完成度、太慢、全链路、需求讨论、技术路线、泳道派发、callback 打断主调度、模板怎么用 | `docs/00-project-state.md`, `docs/04-goal-log.md`, `agent-lanes/message-log.jsonl`, `agent-lanes/dashboard.md` |
+| 主调度泳道 `orchestrator` | 读状态、判断下一步、派发泳道、合并 callback、节奏控制；主调度线程崩溃或过长时触发接管恢复 | `project-orchestrator`, `goal-creator`, `goal-methodology-guide`, `lane-recovery-runner` | 下一步、继续、整体推进、完成度、太慢、全链路、需求讨论、技术路线、泳道派发、callback 打断主调度、模板怎么用、主调度坏了、线程崩了、failed to start turn、agent loop died | `docs/00-project-state.md`, `docs/04-goal-log.md`, `agent-lanes/message-log.jsonl`, `agent-lanes/dashboard.md`, `agent-lanes/lanes/orchestrator/workspace/lane-recovery-*.md` |
 | 规划泳道 `planning` | 需求、范围、验收标准、阶段计划、骨架计划 | `product-spec-builder`, `dev-planner`, `goal-creator`, `requirements-traceability-runner` | 需求、PRD、MVP、先做什么、开发计划、阶段路线、需求追踪、traceability matrix、Skeleton Plan Refresh | `docs/01-product-spec.md`, `docs/03-dev-plan.md`, `docs/05-review-report.md`, planning worklog/workspace |
 | 设计泳道 `design` | UI/UX、信息架构、页面状态、原型、前端体验标准 | `design-brief-builder`, `prototype-builder`, `frontend-quality-runner` | UI、UX、页面怎么设计、交互、信息架构、原型、Figma、前端质感、页面可读性、浏览器截图验收 | `docs/02-design-brief.md`, `docs/05-review-report.md`, `artifacts/<slice>/`, design worklog/workspace |
 | 开发泳道 `development` | 实现、修 bug、联调、局部门禁、真实样本/fixture 接线 | `dev-builder`, `bug-fixer`, `gate-runner`, `systematic-debugging-runner` | 实现、开始开发、改代码、联调、跑起来、bug、报错、测试失败、先查根因、门禁、真实 smoke | 业务代码、`scripts/`, `artifacts/`, `docs/04-goal-log.md`, capability registry 更新 |
 | 守门泳道 `guardian` | 权限、secret、外部 API、账号、付费、发布、安全、provider 边界 | `gate-runner`, `code-reviewer`, `goal-methodology-guide`, `open-source-research-runner` | secret、付费 API、账号、外部 provider、真实调用、license、权限、安全、生产声明、交易/远程写入 | `docs/capability-status.json`, `docs/capability-provider-contract.md`, guardian worklog/workspace |
 | 验收泳道 `review` | 独立验收、证据核对、代码审查、需求覆盖、阶段边界复核 | `review-runner`, `code-reviewer`, `gate-runner`, `requirements-traceability-runner`, `frontend-quality-runner` | 检查是否完成、验收、证据够不够、代码审查、完成了吗、需求覆盖、前后端是否对齐、UI 截图验收 | `docs/05-review-report.md`, `docs/06-release-record.md`, review worklog/workspace |
-| 进化泳道 `evolution` | 沉淀重复失败、改模板、改 hook、改门禁、skill 适配 | `evolution-runner`, `goal-methodology-guide`, `systematic-debugging-runner` | 进化、沉淀规则、模板升级、hook 设置、skill 适配、规则膨胀、callback 机制不对、信息流断了 | 模板目录、`.agents/skills/`, `.codex/hooks/`, `.codex/gates/`, evolution worklog |
+| 进化泳道 `evolution` | 沉淀重复失败、改模板、改 hook、改门禁、skill 适配；把稳定的泳道恢复动作沉淀成模板规则 | `evolution-runner`, `goal-methodology-guide`, `systematic-debugging-runner`, `lane-recovery-runner` | 进化、沉淀规则、模板升级、hook 设置、skill 适配、规则膨胀、callback 机制不对、信息流断了、泳道恢复流程固化 | 模板目录、`.agents/skills/`, `.codex/hooks/`, `.codex/gates/`, evolution worklog |
 
 ## Skill Hook 必须落位的位置
 
@@ -49,10 +49,10 @@
 
 新项目部署模板后，至少检查：
 
-- `.agents/skills/*/SKILL.md` 是否存在，数量应为 18 个。
+- `.agents/skills/*/SKILL.md` 是否存在，数量应为 19 个。
 - 每个 `SKILL.md` 是否有 frontmatter `name` 和 `description`。
 - 每个 `SKILL.md` 是否有“自然语言触发词”“输出”“完成门禁”“打回条件”。
-- `.codex/hooks/skill-hooks.md` 是否存在，并包含 18 个 skill。
+- `.codex/hooks/skill-hooks.md` 是否存在，并包含 19 个 skill。
 - `.codex/hooks/skill-hooks.md` 是否包含“讨论场景 Hook 矩阵”。
 - `.codex/gates/skill-mechanism-check.ps1` 是否通过。
 

@@ -14,6 +14,7 @@
 | 无设计稿但需要高质量前端 | `frontend-quality-runner` | 适合把功能页面提升为清晰、可用、有质感的工具型/工作台界面。 | 设计泳道、开发泳道、验收泳道 |
 | 复杂阶段计划、骨架刷新、纵向切片 | `dev-planner`, `goal-creator` 按需 | 当下一刀、依赖顺序、风险或完成标准不清时使用。 | 主调度泳道、规划泳道 |
 | 真实缺陷、测试失败、异常行为 | `bug-fixer`, `systematic-debugging-runner` | 先复现、追数据流、验证单一假设，再最小修复并同路径回归。 | 开发泳道、验收泳道 |
+| 泳道线程崩溃、过长或无法提交消息 | `lane-recovery-runner` | 按持久化运行态文件完成新线程创建、registry 替换、旧线程归档、恢复提示词投递和审计记录，避免靠聊天记忆接管。 | 主调度泳道、进化泳道 |
 | 浏览器可见 UI 验证 | `playwright`, `e2e-testing` | 用真实浏览器检查导航、页面状态、用户路径、截图和关键回归。 | 开发泳道、验收泳道 |
 | 门禁、证据、能力状态 registry | `gate-runner`, `implementation-verify` 按需 | 把可程序化判断的完成条件变成命令证据。 | 守门泳道、验收泳道 |
 | 代码级独立审查 | `code-reviewer`, `review-runner` | 高风险、跨模块、阶段边界、发布前或用户可见完成声明需要第二视角。 | 验收泳道 |
@@ -23,7 +24,13 @@
 
 ## 外部 skill 引入规则
 
-模板包已内置 4 个本地化增强 skill：`requirements-traceability-runner`、`frontend-quality-runner`、`open-source-research-runner`、`systematic-debugging-runner`。其中 `frontend-quality-runner` 只吸收 `interface-design` 和 `frontend-design` 两个前端设计来源。新项目默认先用这些本地化版本；原始外部 skill 只作为方法来源或深挖补充。
+模板包已内置 5 个本地化增强 skill：`requirements-traceability-runner`、`frontend-quality-runner`、`open-source-research-runner`、`systematic-debugging-runner`、`lane-recovery-runner`。其中 `frontend-quality-runner` 只吸收 `interface-design` 和 `frontend-design` 两个前端设计来源，`lane-recovery-runner` 用于泳道线程恢复接管。新项目默认先用这些落在目标项目 `.agents/skills/` 的本地化版本；原始外部 skill 和公共 skill 只作为方法来源或深挖补充，不能作为项目机制 skill 的最终安装位置。
+
+维护项目机制运作的 skill 创建规则：
+
+- 默认创建到当前项目 `.agents/skills/<skill-name>/`。
+- 同步维护 `.codex/hooks/skill-hooks.md`、`.codex/gates/skill-mechanism-check.ps1` 和模板包 `goal-development-base/.agents/skills/`。
+- 不要把项目机制 skill 安装到公共目录；公共目录中的 skill 只用于学习方法、读取说明或调用系统验证器。
 
 使用 `skill-finder` 时，先运行：
 

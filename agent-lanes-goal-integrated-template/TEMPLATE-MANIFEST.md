@@ -22,10 +22,12 @@
 - `requirements-routing-protocol.md`：需求路由 smoke test 协议。
 - `LANE-GOAL-SKILL-MAP.md`：泳道与 GOAL Skill 的职责映射。
 - `LANE-SKILL-HOOK-MATRIX.md`：每条泳道对应的 skill、自然语言 hook 落位和部署后检查总表。
+- `PERSISTENT-RUNTIME-FILES.md`：解释 registry、message-log、dashboard、worklog、workspace 和 GOAL docs 如何承载可接管项目记忆。
+- `orchestrator-recovery-template.md`：主调度线程崩溃或过长时的新线程接管模板。
 - `EVOLUTION-NOTES.md`：进化泳道可复用规则沉淀入口。
 - `SKILL-RECOMMENDATIONS.md`：质量优先 skill 候选池和外部 skill 引入规则。
 - `tooling-notes.md`：工具可用性和部署注意事项。
-- 已吸收并随包交付的本地化增强 skill：`requirements-traceability-runner`、`frontend-quality-runner`、`open-source-research-runner`、`systematic-debugging-runner`；其中 `frontend-quality-runner` 只吸收 `interface-design` 和 `frontend-design` 两个前端设计来源。新项目默认优先使用这些适配版，不直接把原始外部 skill 作为默认入口。
+- 已吸收并随包交付的本地化增强 skill：`requirements-traceability-runner`、`frontend-quality-runner`、`open-source-research-runner`、`systematic-debugging-runner`、`lane-recovery-runner`；其中 `frontend-quality-runner` 只吸收 `interface-design` 和 `frontend-design` 两个前端设计来源，`lane-recovery-runner` 固化泳道线程崩溃、过长、无法提交消息时的新线程接管、registry 替换、旧线程归档和审计恢复流程。新项目默认优先使用这些适配版，不直接把原始外部 skill 作为默认入口。
 
 ## 邮局回报机制
 
@@ -54,6 +56,12 @@
 - `goal-development-base/FRAMEWORK.md`：GOAL 开发基座方法说明。
 - `goal-development-base/.agents/skills/`：目标项目可选复制的本地 Skill 基座，包含 GOAL 基础 skill 和本地化增强 skill。
 - `goal-development-base/.codex/`：目标项目可选复制的 hook / gate 基座。
+
+本模板的 Skill 安装原则：
+
+- 维护目标项目 GOAL / Agent Lanes 机制运作的 skill 必须项目本地化，最终复制到目标项目 `.agents/skills/<skill-name>/`。
+- 公共 skill 目录、系统 skill 或外部 skill 只作为方法来源、说明来源或验证器来源；不能作为目标项目机制 skill 的最终安装位置。
+- 如果从公共 skill 吸收方法，必须改造成 `goal-development-base/.agents/skills/` 内的本地版，并同步 hook、gate、部署提示词和本清单。
 
 ## 部署验收
 

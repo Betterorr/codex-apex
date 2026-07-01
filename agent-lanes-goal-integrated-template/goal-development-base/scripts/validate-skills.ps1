@@ -4,9 +4,7 @@ $Root = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")
 $SkillRoot = Join-Path $Root ".agents\skills"
 $ValidatorCandidates = @(
   (Join-Path $env:USERPROFILE ".codex\skills\.system\skill-creator\scripts\quick_validate.py"),
-  (Join-Path $env:USERPROFILE ".codex\skills\.system\skill-creator\quick_validate.py"),
-  "C:\Users\Administrator\.codex\skills\.system\skill-creator\scripts\quick_validate.py",
-  "C:\Users\RAY\.codex\skills\.system\skill-creator\scripts\quick_validate.py"
+  (Join-Path $env:USERPROFILE ".codex\skills\.system\skill-creator\quick_validate.py")
 )
 $Validator = $ValidatorCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
 

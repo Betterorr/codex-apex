@@ -34,6 +34,8 @@
    - handoff-protocol.md
    - LANE-GOAL-SKILL-MAP.md
    - LANE-SKILL-HOOK-MATRIX.md
+   - PERSISTENT-RUNTIME-FILES.md
+   - orchestrator-recovery-template.md
    - BOOTSTRAP-PROMPT.md
    - scripts/render_dashboard.py
    - scripts/deploy_agent_lanes_template.py
@@ -75,9 +77,10 @@
    - `scripts/check_callback_post_office.py` -> `agent-lanes/scripts/check_callback_post_office.py`
    - `callback-inbox/post-office-policy.json` -> `agent-lanes/callback-inbox/post-office-policy.json`
    - `goal-development-base/.agents/skills/` -> `.agents/skills/`（只补缺失 skill，不覆盖目标项目已有定制 skill）
+   - 所有维护当前项目 GOAL / Agent Lanes 机制运作的 skill 都必须项目本地化，最终落在目标项目 `.agents/skills/<skill-name>/`；不要安装到 `C:\Users\...\ .codex\skills` 或其他公共 skill 目录。公共 skill、系统 skill、外部 skill 只能作为方法来源，必须改造成目标项目内本地版后才能进入默认流程。
    - `goal-development-base/.codex/hooks/skill-hooks.md` -> `.codex/hooks/skill-hooks.md`（若目标项目已有 hook，合并新增规则，不覆盖旧规则）
 
-   本模板已吸收 4 个本地化增强 skill：`requirements-traceability-runner`、`frontend-quality-runner`、`open-source-research-runner`、`systematic-debugging-runner`。其中前端只默认吸收 `interface-design` 和 `frontend-design` 两个来源。部署后优先使用这些适配版；原始 `requirements-traceability`、`github-research`、`systematic-debugging` 只作为方法来源或临时深挖工具，不能让产物绕开 `docs/*`、泳道 workspace、worklog 和 dashboard。
+   本模板已吸收 5 个本地化增强 skill：`requirements-traceability-runner`、`frontend-quality-runner`、`open-source-research-runner`、`systematic-debugging-runner`、`lane-recovery-runner`。其中前端只默认吸收 `interface-design` 和 `frontend-design` 两个来源，泳道线程恢复默认走 `lane-recovery-runner`。部署后优先使用这些目标项目内 `.agents/skills/` 适配版；原始 `requirements-traceability`、`github-research`、`systematic-debugging` 只作为方法来源或临时深挖工具，不能让产物绕开 `docs/*`、泳道 workspace、worklog 和 dashboard。
 
 5. 初始化 `agent-lanes/callback-inbox/post-office-policy.json`：
    - 把 `enabled_at` 从 `<SET_ON_INSTALL_ISO8601>` 改为当前本地 ISO 时间。
@@ -111,6 +114,8 @@
    - 邮局不得把 pending callback 移出暂存，除非同一批次已经生成 `thread_prompt`、`target_thread_id` 和 `outbox_path`。
    - 主调度收到 `【邮局合并回报】` 后直接处理，不要先去 message-log 收件箱读取原文。
    - 只有证据冲突、疑似重复、门禁报错、需要审计或用户要求追溯时，才打开 message-log 查证。
+   - 项目记忆必须落到持久化运行态文件：`agent-registry.json`、`message-log.jsonl`、`dashboard.md`、`communications-readable.xlsx`、各泳道 `worklog.md` / `workspace/` 和 GOAL docs；主调度线程可替换，运行态文件不可丢。
+   - 如果主调度线程过长、崩溃或出现 `failed to start turn`，按 `orchestrator-recovery-template.md` 新建主调度并更新 `agent-registry.json`。
 
 10. 复制 GOAL 开发基座：
    - 若目标项目还没有 `AGENTS.md`，从 `goal-development-base/AGENTS.md` 复制。

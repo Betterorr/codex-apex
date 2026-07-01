@@ -20,6 +20,7 @@ $RequiredSkills = @(
   "frontend-quality-runner",
   "open-source-research-runner",
   "systematic-debugging-runner",
+  "lane-recovery-runner",
   "evolution-runner",
   "goal-methodology-guide"
 )
@@ -200,7 +201,7 @@ $SpecificChecks = @{
     @{ Name = "review-report-output"; Pattern = "docs/05-review-report.md" },
     @{ Name = "artifact-output"; Pattern = "artifacts/<slice>" },
     @{ Name = "browser-evidence"; Pattern = "Playwright|\u6d4f\u89c8\u5668\u622a\u56fe|\u771f\u5b9e\u6d4f\u89c8\u5668" },
-    @{ Name = "product-context-ui"; Pattern = "\u4ea7\u54c1\u8bed\u5883|\u5de5\u4f5c\u53f0|\u5de5\u5177\u578b\u754c\u9762|landing page" }
+    @{ Name = "research-workbench"; Pattern = "\u7814\u7a76\u5de5\u4f5c\u53f0|landing page" }
   )
   "open-source-research-runner" = @(
     @{ Name = "reference-pool-output"; Pattern = "docs/08-open-source-reference-pool.md" },
@@ -215,6 +216,15 @@ $SpecificChecks = @{
     @{ Name = "root-cause"; Pattern = "root cause|\u6839\u56e0" },
     @{ Name = "same-path-regression"; Pattern = "\u540c\u8def\u5f84\u56de\u5f52|\u590d\u8dd1\u540c\u4e00\u5931\u8d25\u8def\u5f84" },
     @{ Name = "agent-lanes-flow"; Pattern = "message_id|post office|callback|message-log" }
+  )
+  "lane-recovery-runner" = @(
+    @{ Name = "registry-update"; Pattern = "agent-lanes/agent-registry.json" },
+    @{ Name = "message-log-audit"; Pattern = "agent-lanes/message-log.jsonl" },
+    @{ Name = "worklog-update"; Pattern = "worklog.md" },
+    @{ Name = "workspace-recovery"; Pattern = "workspace/lane-recovery|orchestrator-recovery-template" },
+    @{ Name = "thread-replacement"; Pattern = "thread_id|\u65e7\u7ebf\u7a0b|\u65b0\u7ebf\u7a0b" },
+    @{ Name = "archive-old-thread"; Pattern = "\u5f52\u6863\u65e7\u7ebf\u7a0b|\u5386\u53f2\u5ba1\u8ba1" },
+    @{ Name = "dashboard-refresh"; Pattern = "render_dashboard.py|dashboard.md" }
   )
   "evolution-runner" = @(
     @{ Name = "signals-dir"; Pattern = "\.codex/signals/" },
@@ -286,9 +296,11 @@ $RequiredProjectText = @(
   @{ Path = ".codex\hooks\skill-hooks.md"; Name = "hooks-sketch-plan-loop"; Pattern = "Sketch Plan Loop|\u9aa8\u67b6\u8ba1\u5212\u5faa\u73af|Skeleton Plan Refresh" },
   @{ Path = "AGENTS.md"; Name = "agents-sketch-plan-loop"; Pattern = "Sketch Plan Loop|\u9aa8\u67b6\u4f18\u5148\u63a8\u8fdb|\u4ea7\u54c1\u9aa8\u67b6" },
   @{ Path = "AGENTS.md"; Name = "agents-documentation-language"; Pattern = "\u9879\u76ee\u6587\u6863\u4e2d\u6587\u4f18\u5148|language_rule" },
-  @{ Path = ".codex\hooks\skill-hooks.md"; Name = "hooks-documentation-language"; Pattern = "\u4e2d\u6587\u6587\u6863|\u6587\u6863\u4e2d\u6587|\u6240\u6709\u6587\u6863\u7528\u4e2d\u6587" }
-  @{ Path = ".codex\hooks\skill-hooks.md"; Name = "hooks-localized-enhancement-skills"; Pattern = "requirements-traceability-runner|frontend-quality-runner|open-source-research-runner|systematic-debugging-runner" }
-  @{ Path = "AGENTS.md"; Name = "agents-localized-enhancement-skills"; Pattern = "requirements-traceability-runner|frontend-quality-runner|open-source-research-runner|systematic-debugging-runner" }
+  @{ Path = ".codex\hooks\skill-hooks.md"; Name = "hooks-documentation-language"; Pattern = "\u4e2d\u6587\u6587\u6863|\u6587\u6863\u4e2d\u6587|\u6240\u6709\u6587\u6863\u7528\u4e2d\u6587" },
+  @{ Path = ".codex\hooks\skill-hooks.md"; Name = "hooks-localized-enhancement-skills"; Pattern = "requirements-traceability-runner|frontend-quality-runner|open-source-research-runner|systematic-debugging-runner|lane-recovery-runner" },
+  @{ Path = "AGENTS.md"; Name = "agents-localized-enhancement-skills"; Pattern = "requirements-traceability-runner|frontend-quality-runner|open-source-research-runner|systematic-debugging-runner|lane-recovery-runner" },
+  @{ Path = "AGENTS.md"; Name = "agents-project-local-skills"; Pattern = "\.agents/skills|\u516c\u5171 Skill|\u9879\u76ee\u672c\u5730\u5316" },
+  @{ Path = ".agents/skills/evolution-runner/SKILL.md"; Name = "evolution-project-local-skills"; Pattern = "\.agents/skills|\u9879\u76ee\u673a\u5236 Skill|\u516c\u5171 Skill" }
 )
 
 foreach ($check in $RequiredProjectText) {

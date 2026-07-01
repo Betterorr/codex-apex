@@ -7,10 +7,6 @@ description: 当用户提到发布、上线、部署、打包、交付、release
 
 目标：让发布准备状态变成清晰、可验证、可回滚的记录。
 
-## 项目文档中文优先
-
-更新 `docs/*.md`、`agent-lanes/**/*.md`、泳道 worklog、dashboard、GOAL log、review/release/report 正文或模板说明时，默认写中文。专有名词、品牌、代码、命令、路径、API 名、JSON key、状态枚举、错误原文和外部引用标题可以保留英文或原文。
-
 ## 自然语言触发词
 
 用户提到这些词或表达时，优先使用本 Skill：
@@ -34,6 +30,10 @@ description: 当用户提到发布、上线、部署、打包、交付、release
 ## 核心契约
 
 发布不是“代码能跑”。必须能说明怎么启动、怎么验证、怎么看日志、怎么回滚、哪些配置必需、还有什么风险。
+
+## 项目文档中文优先
+
+更新 `docs/*.md`、`agent-lanes/**/*.md`、泳道 worklog、dashboard、GOAL log、review/release/report 正文或模板说明时，默认写中文。专有名词、品牌、代码、命令、路径、API 名、JSON key、状态枚举、错误原文、许可证原文和外部引用标题可以保留英文或原文。
 
 ## 子 Agent 安排
 
