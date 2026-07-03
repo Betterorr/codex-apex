@@ -1,11 +1,11 @@
 ---
 name: systematic-debugging-runner
-description: 当用户提到 bug、报错、测试失败、构建失败、UI 行为异常、信息流断了、callback 没送到、门禁异常、数据接线不对、修了还坏、不要猜、先查根因、root cause、系统化调试时，使用这个 Skill 在 MoneyDigger 体系内执行根因优先的调试流程；输出必须回写 docs/04-goal-log.md、相关泳道 worklog、docs/05-review-report.md 或 artifacts，不得只给口头猜测。
+description: 当用户提到 bug、报错、测试失败、构建失败、UI 行为异常、信息流断了、callback 没送到、门禁异常、数据接线不对、修了还坏、不要猜、先查根因、root cause、系统化调试时，使用这个 Skill 在 目标项目 体系内执行根因优先的调试流程；输出必须回写 docs/04-goal-log.md、相关泳道 worklog、docs/05-review-report.md 或 artifacts，不得只给口头猜测。
 ---
 
-# MoneyDigger 系统化调试执行器
+# 目标项目 系统化调试执行器
 
-目标：吸收 `systematic-debugging` 的根因优先方法，适配 MoneyDigger 的 GOAL、Agent Lanes、post office、dashboard 和 capability registry。
+目标：吸收 `systematic-debugging` 的根因优先方法，适配 目标项目的 GOAL、Agent Lanes、post office、dashboard 和 capability registry。
 
 ## 核心契约
 
@@ -45,13 +45,13 @@ description: 当用户提到 bug、报错、测试失败、构建失败、UI 行
 3. 单一假设验证：一次只验证一个根因假设，使用最小命令或最小改动。
 4. 修复和回归：只修根因，不顺手重构；修后复跑同一失败路径和必要聚焦门禁。
 
-## MoneyDigger 特别规则
+## 目标项目 特别规则
 
 - Agent Lanes 信息流问题优先按 `message_id`、`reply_to`、`batch_id`、`thread_prompt`、`send_required`、`outbox_path` 追踪，不要只看文件尾。
 - post office 问题必须区分 `message-log` 审计备份和真实 `thread_prompt` 投递。
 - capability 问题必须核对 `docs/capability-status.json`，不能用 fixture 或 mock 推进真实 provider maturity。
 - 前端问题要用真实浏览器、截图或 DOM 状态证明，不只看 JS 语法。
-- 外部 API、secret、券商、交易、付费或 scheduler 问题先停到守门边界，不擅自真实调用。
+- 外部 API、secret、受监管操作、高风险自动化执行、付费或 scheduler 问题先停到守门边界，不擅自真实调用。
 
 ## 打回条件
 

@@ -108,3 +108,9 @@ agent-lanes-goal-integrated-template/BOOTSTRAP-PROMPT-GOAL-INTEGRATED.md
 - 仓库名：`codex-apex`
 - 开源协议：MIT
 - 文档形态：英文入口 + 中文模板主体
+
+当前模板包版本：`20260703-loop-empty-array-warning-fix`。
+
+- 保留 Next Mainline Slice Selection，用于主线自动续航和下一切片选择。
+- 修复 Product Loop 字段告警：空的 `blocking_concerns` / `backlog_concerns` 数组表示当前无 concern，不再视为字段缺失。
+- 新增 `frontend-workflow-planner` 和 `VERSION-HISTORY.md`。

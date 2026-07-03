@@ -7,11 +7,14 @@
 
 拿到这份目录的人，可以把整个目录复制到目标项目，然后把 `BOOTSTRAP-PROMPT-GOAL-INTEGRATED.md` 里的提示词发给 Codex，让 Codex 自动装配运行态。
 
+对外发布和升级记录见 `VERSION-HISTORY.md`。每次重新打包发布前，应先追加版本说明，再生成新的 zip 和 manifest。
+
 ## 包内结构
 
 ```text
 agent-lanes-goal-integrated-template/
   README-GOAL-INTEGRATED.md
+  VERSION-HISTORY.md
   BOOTSTRAP-PROMPT-GOAL-INTEGRATED.md
   LANE-GOAL-SKILL-MAP.md
   LANE-SKILL-HOOK-MATRIX.md
@@ -98,7 +101,7 @@ docs/04-goal-log.md
 
 - 背景、偏好、观察或未稳定想法：标为 `capture_only`，写入合适文档或 message-log。
 - 已形成稳定小任务：标为 `dispatch_needed`，派给合适泳道，或写 `pending_dispatch` fallback。
-- 涉及路线锁定、产品取舍、真实外部调用、付费、secret、账号、持久写入、券商/交易、生产声明或重型框架采用：标为 `confirmation_needed`，先给用户确认卡。
+- 涉及路线锁定、产品取舍、真实外部调用、付费、secret、账号、持久写入、受监管操作/高风险自动化执行、生产声明或重型框架采用：标为 `confirmation_needed`，先给用户确认卡。
 - 信息不足且容易跑偏：标为 `clarify_needed`，只问最小必要问题。
 
 派发任务必须带 `discussion_source` 或 `source_message_id`，让 completion callback 能追溯到是哪次讨论触发。

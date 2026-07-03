@@ -18,6 +18,7 @@ $RequiredSkills = @(
   "release-builder",
   "requirements-traceability-runner",
   "frontend-quality-runner",
+  "frontend-workflow-planner",
   "open-source-research-runner",
   "systematic-debugging-runner",
   "lane-recovery-runner",
@@ -67,6 +68,13 @@ $SpecificChecks = @{
     @{ Name = "discussion-intake"; Pattern = "discussion intake|\u8fde\u7eed\u8ba8\u8bba|capture_only|dispatch_needed" },
     @{ Name = "discussion-hook-matrix"; Pattern = "\u8ba8\u8bba\u573a\u666f Hook \u77e9\u9635|\u4f18\u5148 Skill|\u9ed8\u8ba4\u6cf3\u9053" },
     @{ Name = "structured-dispatch"; Pattern = "\u7ed3\u6784\u5316\u6d3e\u53d1|structured" },
+    @{ Name = "product-loop-check"; Pattern = "Product Loop Check|active_user_loop|loop_impact" },
+    @{ Name = "stage-value-gate"; Pattern = "Stage Value Gate|stage_priority|why_now|mainline_impact" },
+    @{ Name = "next-mainline-slice-selection"; Pattern = "Next Mainline Slice Selection|next_mainline_slice_selection|stage_release_record" },
+    @{ Name = "mainline-concern-policy"; Pattern = "blocking_concerns[\s\S]*backlog_concerns[\s\S]*P1/P2|backlog_concerns[\s\S]*backlog" },
+    @{ Name = "needs-context-only-three"; Pattern = "NEEDS_CONTEXT|secret|account|regulated operation|high-risk automation|\u771f\u5b9e\u5916\u90e8\u8c03\u7528|\u4ed8\u8d39|\u53d7\u76d1\u7ba1\u64cd\u4f5c|\u9ad8\u98ce\u9669\u81ea\u52a8\u5316\u6267\u884c|\u91cd\u5927\u4ea7\u54c1\u8def\u7ebf|\u4e0a\u4e0b\u6587\u4e0d\u8db3" },
+    @{ Name = "backlog-concern-policy"; Pattern = "blocking_concern|backlog_concern" },
+    @{ Name = "callback-loop-fields"; Pattern = "active_user_loop[\s\S]*blocking_concerns[\s\S]*backlog_concerns[\s\S]*recommended_next_type" },
     @{ Name = "next-continue"; Pattern = "\u4e0b\u4e00\u6b65|\u7ee7\u7eed" },
     @{ Name = "local-skills"; Pattern = "product-spec-builder|dev-builder|review-runner" }
   )
@@ -78,7 +86,8 @@ $SpecificChecks = @{
   "design-brief-builder" = @(
     @{ Name = "design-doc"; Pattern = "docs/02-design-brief.md" },
     @{ Name = "interaction"; Pattern = "\u4ea4\u4e92" },
-    @{ Name = "prototype-boundary"; Pattern = "\u539f\u578b|\u590d\u7528" }
+    @{ Name = "prototype-boundary"; Pattern = "\u539f\u578b|\u590d\u7528" },
+    @{ Name = "callback-loop-fields"; Pattern = "active_user_loop[\s\S]*blocking_concerns[\s\S]*backlog_concerns[\s\S]*recommended_next_type" }
   )
   "prototype-builder" = @(
     @{ Name = "prototype"; Pattern = "\u539f\u578b" },
@@ -94,7 +103,8 @@ $SpecificChecks = @{
     @{ Name = "capability-registry"; Pattern = "docs/capability-status.json|validate-capability-status.ps1" },
     @{ Name = "multi-lane-optional-plan"; Pattern = "\u591a\u6cf3\u9053|\u6cf3\u9053\u4f9d\u8d56|\u5e76\u884c\u6cf3\u9053" },
     @{ Name = "skeleton-plan-mode"; Pattern = "Skeleton Plan Refresh|Skeleton Pass|Real Pass|Quality Pass|Production Pass" },
-    @{ Name = "skeleton-gap-questions"; Pattern = "\u54ea\u4e00\u73af\u662f\u7a7a\u767d|3-6|\u8584\u7eb5\u5411\u5207\u7247" }
+    @{ Name = "skeleton-gap-questions"; Pattern = "\u54ea\u4e00\u73af\u662f\u7a7a\u767d|3-6|\u8584\u7eb5\u5411\u5207\u7247" },
+    @{ Name = "callback-loop-fields"; Pattern = "active_user_loop[\s\S]*blocking_concerns[\s\S]*backlog_concerns[\s\S]*recommended_next_type" }
   )
   "goal-creator" = @(
     @{ Name = "completion-standards"; Pattern = "\u5b8c\u6210\u6807\u51c6" },
@@ -127,7 +137,8 @@ $SpecificChecks = @{
     @{ Name = "capability-focus-budget"; Pattern = "current-stage-good-enough|non-same-capability loop" },
     @{ Name = "skeleton-thin-slice"; Pattern = "\u8584\u7eb5\u5411\u5207\u7247|\u9aa8\u67b6\u8ba1\u5212\u4e0b\u4e00\u5200|Skeleton Plan" },
     @{ Name = "skeleton-output-judgment"; Pattern = "Skeleton Pass|Real Pass|Quality Pass|Production Pass|\u4ea7\u54c1\u9aa8\u67b6" },
-    @{ Name = "cumulative-review"; Pattern = "3-5|\u5c0f\u4fee.*\u5408\u5e76\u5ba1\u67e5" }
+    @{ Name = "cumulative-review"; Pattern = "3-5|\u5c0f\u4fee.*\u5408\u5e76\u5ba1\u67e5" },
+    @{ Name = "callback-loop-fields"; Pattern = "active_user_loop[\s\S]*blocking_concerns[\s\S]*backlog_concerns[\s\S]*recommended_next_type" }
   )
   "bug-fixer" = @(
     @{ Name = "reproduce"; Pattern = "\u590d\u73b0" },
@@ -151,7 +162,8 @@ $SpecificChecks = @{
     @{ Name = "mock-boundary"; Pattern = "mock|stub|monkeypatch" },
     @{ Name = "media-fixture-scope"; Pattern = "audio fixture|video fixture|selectable atom" },
     @{ Name = "cumulative-review"; Pattern = "3-5|\u5c0f\u4fee.*\u5408\u5e76\u5ba1\u67e5" },
-    @{ Name = "release-gate"; Pattern = "\u53d1\u5e03\u95e8\u7981|\u5192\u70df|\u56de\u6eda" }
+    @{ Name = "release-gate"; Pattern = "\u53d1\u5e03\u95e8\u7981|\u5192\u70df|\u56de\u6eda" },
+    @{ Name = "callback-loop-fields"; Pattern = "active_user_loop[\s\S]*blocking_concerns[\s\S]*backlog_concerns[\s\S]*recommended_next_type" }
   )
   "code-reviewer" = @(
     @{ Name = "code-review"; Pattern = "\u4ee3\u7801\u5ba1\u67e5|\u4ee3\u7801\u7ea7\u5ba1\u67e5" },
@@ -178,6 +190,9 @@ $SpecificChecks = @{
     @{ Name = "real-execution-self-close"; Pattern = "\u771f\u5b9e\u6267\u884c\u5931\u8d25.*cwd|\u771f\u5b9e\u6267\u884c\u901a\u8fc7.*artifact" },
     @{ Name = "mock-boundary"; Pattern = "mock|stub|monkeypatch" },
     @{ Name = "media-fixture-scope"; Pattern = "audio fixture|video/raw-video|scene-split|atom" },
+    @{ Name = "user-loop-progress"; Pattern = "user_loop_progress|blocking_concerns|backlog_concerns" },
+    @{ Name = "recommended-next-type"; Pattern = "recommended_next_type|vertical_loop|backlog_only" },
+    @{ Name = "callback-loop-fields"; Pattern = "active_user_loop[\s\S]*user_loop_progress[\s\S]*blocking_concerns[\s\S]*backlog_concerns[\s\S]*recommended_next_type" },
     @{ Name = "cumulative-review"; Pattern = "3-5|\u5c0f\u4fee.*\u5408\u5e76\u5ba1\u67e5" }
   )
   "release-builder" = @(
@@ -203,6 +218,18 @@ $SpecificChecks = @{
     @{ Name = "browser-evidence"; Pattern = "Playwright|\u6d4f\u89c8\u5668\u622a\u56fe|\u771f\u5b9e\u6d4f\u89c8\u5668" },
     @{ Name = "research-workbench"; Pattern = "\u7814\u7a76\u5de5\u4f5c\u53f0|landing page" }
   )
+  "frontend-workflow-planner" = @(
+    @{ Name = "frontend-doc-output"; Pattern = "docs/frontend/" },
+    @{ Name = "ia-artifact"; Pattern = "01-information-architecture.md" },
+    @{ Name = "surface-artifact"; Pattern = "02-surface-specs.md" },
+    @{ Name = "component-inventory"; Pattern = "03-component-inventory.md" },
+    @{ Name = "data-contract-map"; Pattern = "04-data-contract-map.md|data_contract" },
+    @{ Name = "design-token-plan"; Pattern = "05-design-token-plan.md|Design Token" },
+    @{ Name = "figma-bridge"; Pattern = "06-figma-bridge.md|Figma" },
+    @{ Name = "iteration-log"; Pattern = "07-iteration-log.md|iteration-log" },
+    @{ Name = "external-skill-boundary"; Pattern = "interface-design|frontend-design|figma-use|figma-generate-design|Figma" },
+    @{ Name = "guardian-boundary"; Pattern = "guardian|provider live call|secret|scheduler|production feed|high-risk|regulated" }
+  )
   "open-source-research-runner" = @(
     @{ Name = "reference-pool-output"; Pattern = "docs/08-open-source-reference-pool.md" },
     @{ Name = "research-roadmap-output"; Pattern = "docs/09-research-roadmap.md" },
@@ -224,13 +251,17 @@ $SpecificChecks = @{
     @{ Name = "workspace-recovery"; Pattern = "workspace/lane-recovery|orchestrator-recovery-template" },
     @{ Name = "thread-replacement"; Pattern = "thread_id|\u65e7\u7ebf\u7a0b|\u65b0\u7ebf\u7a0b" },
     @{ Name = "archive-old-thread"; Pattern = "\u5f52\u6863\u65e7\u7ebf\u7a0b|\u5386\u53f2\u5ba1\u8ba1" },
+    @{ Name = "slim-recovery-prompt"; Pattern = "\u7626\u8eab\u63a5\u7ba1|\u77ed\u5065\u5eb7\u68c0\u67e5|\u4e0d\u8981\u4e00\u6b21\u6027\u585e\u5165" },
+    @{ Name = "health-check-before-cutover"; Pattern = "\u5065\u5eb7\u68c0\u67e5\u901a\u8fc7\u524d|\u81f3\u5c11\u4e24\u6b21\u8f7b\u91cf\u5065\u5eb7\u68c0\u67e5|current thread" },
+    @{ Name = "second-failure-archive"; Pattern = "\u4e8c\u6b21\u6545\u969c|agent loop died unexpectedly|failed to start turn" },
     @{ Name = "dashboard-refresh"; Pattern = "render_dashboard.py|dashboard.md" }
   )
   "evolution-runner" = @(
     @{ Name = "signals-dir"; Pattern = "\.codex/signals/" },
     @{ Name = "auto-landing-boundary"; Pattern = "\u81ea\u52a8\u843d\u5730\u6743\u9650|\u5fc5\u987b\u5148\u505c\u4e0b\u6765\u8bf7\u6c42\u7528\u6237\u786e\u8ba4" },
     @{ Name = "prune-rules"; Pattern = "\u5220\u9664\u89c4\u5219|\u957f\u671f\u4e0d\u7528|\u8fc7\u65f6" },
-    @{ Name = "evolve-other-skills"; Pattern = "\u8fdb\u5316\u5176\u4ed6 Skill|\u88ab\u8fdb\u5316\u7684 Skill|\u672c\u5730 Skills" }
+    @{ Name = "evolve-other-skills"; Pattern = "\u8fdb\u5316\u5176\u4ed6 Skill|\u88ab\u8fdb\u5316\u7684 Skill|\u672c\u5730 Skills" },
+    @{ Name = "callback-loop-fields"; Pattern = "active_user_loop[\s\S]*blocking_concerns[\s\S]*backlog_concerns[\s\S]*recommended_next_type" }
   )
   "goal-methodology-guide" = @(
     @{ Name = "methodology-reference"; Pattern = "GOAL-methodology-abstract.md" },
@@ -295,17 +326,29 @@ $RequiredProjectText = @(
   @{ Path = ".codex\hooks\skill-hooks.md"; Name = "hooks-lane-dispatch-trace"; Pattern = "discussion_source|source_message_id|pending_dispatch" },
   @{ Path = ".codex\hooks\skill-hooks.md"; Name = "hooks-sketch-plan-loop"; Pattern = "Sketch Plan Loop|\u9aa8\u67b6\u8ba1\u5212\u5faa\u73af|Skeleton Plan Refresh" },
   @{ Path = "AGENTS.md"; Name = "agents-sketch-plan-loop"; Pattern = "Sketch Plan Loop|\u9aa8\u67b6\u4f18\u5148\u63a8\u8fdb|\u4ea7\u54c1\u9aa8\u67b6" },
+  @{ Path = "AGENTS.md"; Name = "agents-product-loop-first"; Pattern = "Product Loop First|active_user_loop|loop_impact" },
+  @{ Path = "AGENTS.md"; Name = "agents-stage-value-gate"; Pattern = "Stage Value Gate|stage_priority|why_now|mainline_impact" },
+  @{ Path = "AGENTS.md"; Name = "agents-next-mainline-slice-selection"; Pattern = "Next Mainline Slice Selection|next_mainline_slice_selection|stage_release_record" },
+  @{ Path = "AGENTS.md"; Name = "agents-mainline-concern-policy"; Pattern = "blocking_concerns[\s\S]*backlog_concerns[\s\S]*P1/P2|backlog_concerns[\s\S]*backlog" },
+  @{ Path = "AGENTS.md"; Name = "agents-callback-loop-fields"; Pattern = "active_user_loop[\s\S]*blocking_concerns[\s\S]*backlog_concerns[\s\S]*recommended_next_type" },
+  @{ Path = "agent-lanes\scripts\render_dashboard.py"; Name = "dashboard-loop-warnings"; Pattern = "loop_field_warnings|recent_loop_warnings|Product Loop"; Optional = $true },
+  @{ Path = "agent-lanes\scripts\deliver_callback.py"; Name = "post-office-loop-warnings"; Pattern = "callback_loop_field_warnings|missing_product_loop_fields"; Optional = $true },
   @{ Path = "AGENTS.md"; Name = "agents-documentation-language"; Pattern = "\u9879\u76ee\u6587\u6863\u4e2d\u6587\u4f18\u5148|language_rule" },
   @{ Path = ".codex\hooks\skill-hooks.md"; Name = "hooks-documentation-language"; Pattern = "\u4e2d\u6587\u6587\u6863|\u6587\u6863\u4e2d\u6587|\u6240\u6709\u6587\u6863\u7528\u4e2d\u6587" },
   @{ Path = ".codex\hooks\skill-hooks.md"; Name = "hooks-localized-enhancement-skills"; Pattern = "requirements-traceability-runner|frontend-quality-runner|open-source-research-runner|systematic-debugging-runner|lane-recovery-runner" },
+  @{ Path = ".codex\hooks\skill-hooks.md"; Name = "hooks-frontend-workflow-planner"; Pattern = "frontend-workflow-planner|data_contract|Design Token" },
   @{ Path = "AGENTS.md"; Name = "agents-localized-enhancement-skills"; Pattern = "requirements-traceability-runner|frontend-quality-runner|open-source-research-runner|systematic-debugging-runner|lane-recovery-runner" },
   @{ Path = "AGENTS.md"; Name = "agents-project-local-skills"; Pattern = "\.agents/skills|\u516c\u5171 Skill|\u9879\u76ee\u672c\u5730\u5316" },
+  @{ Path = ".codex\hooks\skill-hooks.md"; Name = "hooks-lane-recovery-health-check"; Pattern = "\u7626\u8eab\u63a5\u7ba1|\u5065\u5eb7\u68c0\u67e5|\u4e8c\u6b21\u6545\u969c" },
   @{ Path = ".agents/skills/evolution-runner/SKILL.md"; Name = "evolution-project-local-skills"; Pattern = "\.agents/skills|\u9879\u76ee\u673a\u5236 Skill|\u516c\u5171 Skill" }
 )
 
 foreach ($check in $RequiredProjectText) {
   $target = Join-Path $Root $check.Path
   if (-not (Test-Path -LiteralPath $target)) {
+    if ($check.Optional) {
+      continue
+    }
     $Failures += "$($check.Path) missing for $($check.Name)"
     continue
   }

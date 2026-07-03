@@ -6,7 +6,7 @@
 
 | Skill | 常见触发词 |
 | --- | --- |
-| `project-orchestrator` | 下一步、继续、接着做、往下推进、自动推进、轻量继续、高速产品工程经理、综合调用、总调度、根据当前项目状态决定做什么、继续闭环、推进项目、从当前状态开始、按 GOAL 流程继续、接手继续、你自己判断下一步、自动往后走、别问我先看项目、需求讨论、路线讨论、技术路线、我有个想法、我觉得、我们讨论一下、持续迭代、自动落档、脱手、自主迭代、自动规划、自动落实、callback hook、callback 打断主调度、主调度被打断、主调度收件箱、callback inbox、前端后端怎么推进、前后端联调、前端后端分流、分层推进、多泳道协作、并行泳道、泳道派发、泳道排队、任务排队、任务被覆盖、回复截断、上下文覆盖、泳道被打断、真实接入、外部 API 接入、模型接入、Provider 接入、能力状态 registry、单能力聚焦预算、capability exit check、provider 深挖收敛、Sketch Plan Loop、骨架计划循环、骨架优先、完成度、太慢、整体推进、项目还差什么、全链路扫描、中文文档、文档中文、项目文档中文优先、所有文档用中文 |
+| `project-orchestrator` | 下一步、继续、接着做、往下推进、自动推进、轻量继续、高速产品工程经理、综合调用、总调度、根据当前项目状态决定做什么、继续闭环、推进项目、从当前状态开始、按 GOAL 流程继续、接手继续、你自己判断下一步、自动往后走、别问我先看项目、需求讨论、路线讨论、技术路线、我有个想法、我觉得、我们讨论一下、持续迭代、自动落档、脱手、自主迭代、自动规划、自动落实、callback hook、callback 打断主调度、主调度被打断、主调度收件箱、callback inbox、前端后端怎么推进、前后端联调、前端后端分流、分层推进、多泳道协作、并行泳道、泳道派发、泳道排队、任务排队、任务被覆盖、回复截断、上下文覆盖、泳道被打断、真实接入、外部 API 接入、模型接入、Provider 接入、能力状态 registry、单能力聚焦预算、capability exit check、provider 深挖收敛、Sketch Plan Loop、骨架计划循环、骨架优先、Product Loop First、用户闭环优先、持续交付可用产品、先打通可用闭环、不要证明每个零件安全、完成度、太慢、整体推进、项目还差什么、全链路扫描、中文文档、文档中文、项目文档中文优先、所有文档用中文 |
 | `product-spec-builder` | 需求、产品需求、PRD、需求文档、产品文档、需求澄清、范围、做与不做、用户故事、验收标准、产品想法、MVP、功能边界、帮我想清楚产品、定义第一版、目标用户、核心场景、用户痛点、业务流程、功能清单、非目标、聊聊需求、探讨需求、讨论需求、梳理需求、需求脑暴、产品脑暴、我有个想法、我想做一个、这个产品怎么定义、这个功能要不要做、需求取舍、方案取舍、第一版先做什么、先别开发、先把需求想清楚 |
 | `design-brief-builder` | 设计、设计规范、设计 brief、UI、UX、交互、布局、信息架构、视觉方向、界面风格、设计参考、页面状态、空状态、产品气质、视觉规范、响应式、移动端、桌面端、可访问性、文案语气、颜色、字体、圆角、密度、聊聊界面、讨论交互、页面怎么组织、这个界面怎么设计、用户怎么操作 |
 | `prototype-builder` | 原型、设计稿、高保真、线框图、可点击原型、Figma、截图转实现、设计代码、原型代码、静态原型、复用原型、页面清单、状态覆盖、按原型开发、不要重写设计、原型验收、交互演示、demo 页面 |
@@ -16,15 +16,15 @@
 | `bug-fixer` | bug、报错、异常、失败、坏了、不能用、测试失败、构建失败、回归、修复、fix、debug、复现、根因、定位问题、回归验证、页面点不动、流程断了、线上问题、用户反馈问题、之前好的现在坏了 |
 | `gate-runner` | 门禁、自动门禁、检查、跑验证、跑测试、跑构建、typecheck、lint、CI、本地验收、浏览器验收、程序判断、验收脚本、检查脚本、质量门、不能口头通过、证据、冒烟测试、必需文档检查、真实 smoke、真实样本、API 联通、模型联通、Provider 门禁 |
 | `code-reviewer` | 代码审查、code review、review 代码、看 diff、检查改动、代码风险、测试缺口、架构偏移、文档漂移、安全风险、认证权限、数据风险、回归风险、发布前代码质量、找问题不要改、独立看代码 |
-| `review-runner` | 独立审查、总体验收、闭环审查、流程审计、检查是否完成、完成了吗、验收证据、审查报告、第二视角、新脑子、证据够不够、有没有闭环缺陷、是否可以收工、是否可以发布、GOAL 完成检查、前后端是否对齐、联调是否完成、前端后端一致性、真实接入是否完成、模型/API 是否真的跑通 |
+| `review-runner` | 独立审查、总体验收、闭环审查、流程审计、检查是否完成、完成了吗、验收证据、审查报告、第二视角、新脑子、证据够不够、有没有闭环缺陷、是否可以收工、是否可以发布、GOAL 完成检查、用户闭环是否推进、持续交付是否被流程拖慢、是不是又在证明局部零件、前后端是否对齐、联调是否完成、前端后端一致性、真实接入是否完成、模型/API 是否真的跑通 |
 | `release-builder` | 发布、上线、部署、打包、交付、release、deploy、生产就绪、试运行、发布记录、环境变量、启动方式、日志、回滚、冒烟测试、上线前检查、交接、客户交付、部署地址、运行记录、配置项、模型依赖、外部 API 依赖、Provider 依赖、依赖剥离 |
 | `evolution-runner` | 进化、自进化、自净化、规则更新、沉淀规则、signals、失败信号、复盘规则、删规则、规则膨胀、问题库、调优框架、优化其他 Skill、让 Skill 更适应项目、自动进化本地 Skills、净化规则、净化 schema、调整 Skill 边界、中文文档规则、文档语言规则、所有 Skill 文档中文 |
 | `goal-methodology-guide` | GOAL 方法论、这套机制、开发基座、模板包怎么用、什么时候用哪个 Skill、脚本门禁、自动门禁、自进化、沉淀规则、子 Agent、新脑子、复制出去也能懂 |
 | `requirements-traceability-runner` | 需求追踪、traceability matrix、需求到设计/代码/测试映射、验收覆盖、需求漂移、哪个需求有没有实现、发布前需求闭环 |
-| `frontend-quality-runner` | 前端体验质量、UI 质感、信息架构、页面可读性、文本溢出、浏览器截图验收、dashboard 好不好用、研究工作台好不好用、移动端适配 |
-| `open-source-research-runner` | GitHub 调研、开源库选型、找资源、找实现、github-research、provider 候选、回测框架、图表库、金融数据源、license 评估 |
+| `frontend-quality-runner` | 前端体验质量、UI 质感、信息架构、页面可读性、文本溢出、浏览器截图验收、dashboard 好不好用、业务工作台好不好用、移动端适配 |
+| `open-source-research-runner` | GitHub 调研、开源库选型、找资源、找实现、github-research、provider 候选、评估框架、图表库、领域数据源、license 评估 |
 | `systematic-debugging-runner` | bug、报错、测试失败、构建失败、信息流断了、callback 没送到、门禁异常、数据接线不对、先查根因、root cause、系统化调试 |
-| `lane-recovery-runner` | 泳道坏了、主调度坏了、线程崩了、线程死了、旧线程太长、failed to start turn、agent loop died unexpectedly、Error submitting message、新建泳道替换、注册替换、接管旧泳道、恢复接管、替换 thread_id、更新 registry、旧线程归档、新线程沿用原名字、主调度恢复、orchestrator recovery、坏掉的 lane recovery |
+| `lane-recovery-runner` | 泳道坏了、主调度坏了、线程崩了、线程死了、旧线程太长、failed to start turn、agent loop died unexpectedly、Error submitting message、新建泳道替换、注册替换、接管旧泳道、恢复接管、替换 thread_id、更新 registry、旧线程归档、新线程沿用原名字、主调度恢复、orchestrator recovery、坏掉的 lane recovery、瘦身接管、健康检查、二次故障 |
 
 ## 讨论场景 Hook 矩阵
 
@@ -34,23 +34,23 @@
 | --- | --- | --- | --- | --- |
 | 探讨需求、产品想法、功能取舍、目标用户、先做什么不做什么 | `project-orchestrator` -> `product-spec-builder` | `planning` | `docs/01-product-spec.md`, `docs/03-dev-plan.md`, `agent-lanes/message-log.jsonl` | 形成稳定需求切片或验收标准时派发；只是背景/偏好时 `capture_only` |
 | 探讨计划、阶段路线、优先级、里程碑、下一轮 GOAL | `project-orchestrator` -> `dev-planner`; 目标不清时加 `goal-creator` | `planning` 或 `orchestrator` | `docs/03-dev-plan.md`, `docs/04-goal-log.md`, `agent-lanes/message-log.jsonl` | 需要拆任务、定阶段或改变优先级时派发；路线锁定前用 `confirmation_needed` |
-| 探讨技术方案、架构、数据源、开源库、provider/API、模型或能力接入 | `project-orchestrator` -> `dev-planner`; 涉及真实调用/secret/条款/成本时加 `gate-runner` 或 `code-reviewer` | `planning`, `guardian`; 确认后才到 `development` | `docs/09-research-roadmap.md`, `docs/13-l1-l5-information-source-architecture.md`, `docs/14-market-candidate-classification.md`, `docs/capability-status.json`, provider card | 低风险调研可记录和派规划；真实 provider/API/模型/付费/账号/交易能力必须先进 `guardian` |
+| 探讨技术方案、架构、数据源、开源库、provider/API、模型或能力接入 | `project-orchestrator` -> `dev-planner`; 涉及真实调用/secret/条款/成本时加 `gate-runner` 或 `code-reviewer` | `planning`, `guardian`; 确认后才到 `development` | `docs/09-research-roadmap.md`, `docs/13-l1-l5-information-source-architecture.md`, `docs/14-market-candidate-classification.md`, `docs/capability-status.json`, provider card | 低风险调研可记录和派规划；真实 provider/API/模型/付费/账号/受监管操作/高风险自动化执行能力必须先进 `guardian` |
 | 探讨 UI、页面体验、信息架构、交互状态、面板或原型 | `design-brief-builder`; 需要 demo 时加 `prototype-builder` | `design` | `docs/02-design-brief.md`, 原型或 artifact 路径 | 有明确页面、用户操作或状态覆盖要求时派发；未确认产品方向时只写设计影响 |
 | 讨论实现、联调、本地验证、脚本、fixture、端到端样本 | `dev-builder`, `bug-fixer`, `gate-runner` | `development` | `scripts/`, `artifacts/`, `moneydigger/`, `docs/03-dev-plan.md`, `docs/capability-status.json` | 需求/边界已清楚且无外部授权风险时派发；否则先 `planning` 或 `guardian` |
 | 讨论验收、完成判断、证据冲突、风险复核、是否可收工 | `review-runner`, `gate-runner`, `code-reviewer` | `review` | `docs/05-review-report.md`, `agent-lanes/dashboard.md`, `agent-lanes/message-log.jsonl` | 已有产物或回报需要独立核对时派发 |
 | 讨论机制、模板、hook、skill、泳道协作、重复摩擦或规则进化 | `evolution-runner`, `goal-methodology-guide` | `evolution` | `.codex/hooks/`, `.agents/skills/`, `agent-lanes/agent-lanes.md`, `docs/agent-lanes-goal-integrated-template/` | 用户明确要求优化机制，或多次流程摩擦暴露可复用规则缺口时派发 |
 | 讨论项目文档语言、文档中文、英文模板看不懂、所有文档尽量中文 | `project-orchestrator` -> `evolution-runner`; 需要解释机制时加 `goal-methodology-guide` | `evolution` | `AGENTS.md`, `.agents/skills/**/SKILL.md`, `.codex/hooks/skill-hooks.md`, `.codex/gates/skill-mechanism-check.ps1`, `docs/04-goal-log.md` | 用户把语言要求明确为长期项目规则时派发；只是一份文档翻译需求时按对应业务 Skill 处理 |
 | 讨论需求追踪、验收覆盖、需求是否被设计/实现/测试覆盖 | `requirements-traceability-runner` | `planning` 或 `review` | `docs/05-review-report.md`, `agent-lanes/lanes/<lane>/workspace/traceability-<message_id>.md` | 阶段验收、发布前、需求漂移或用户明确要求追踪矩阵时派发 |
-| 讨论前端质感、页面可读性、信息架构或浏览器截图验收 | `frontend-quality-runner` | `design`, `development` 或 `review` | `docs/02-design-brief.md`, `docs/05-review-report.md`, `artifacts/<slice>/` | 用户可见 UI、dashboard、研究工作台或截图证据不足时派发 |
+| 讨论前端质感、页面可读性、信息架构或浏览器截图验收 | `frontend-quality-runner` | `design`, `development` 或 `review` | `docs/02-design-brief.md`, `docs/05-review-report.md`, `artifacts/<slice>/` | 用户可见 UI、dashboard、业务工作台或截图证据不足时派发 |
 | 讨论开源库、GitHub 资源、provider 候选或外部实现选型 | `open-source-research-runner`; 涉及引入代码/依赖时加 `gate-runner` 或 `guardian` | `planning` 或 `guardian` | `docs/08-open-source-reference-pool.md`, `docs/09-research-roadmap.md`, `docs/capability-status.json`, 泳道 workspace | 需要比较维护度、license、依赖复杂度和集成边界时派发 |
 | 讨论 bug、信息流断点、门禁异常、callback 投递异常或需要根因定位 | `systematic-debugging-runner`; 修复代码时再接 `bug-fixer` | `development`, `review` 或 `evolution` | `docs/04-goal-log.md`, 相关泳道 `worklog.md`, `docs/05-review-report.md`, `artifacts/<slice>/` | 需要复现、数据流追踪、单假设验证和同路径回归时派发 |
-| 讨论泳道线程崩溃、旧线程过长、主调度无法提交消息、需要新建线程替换和 registry 接管 | `lane-recovery-runner`; 若暴露可复用机制缺口再接 `evolution-runner` | `orchestrator` 或对应故障泳道，必要时 `evolution` | `agent-lanes/agent-registry.json`, `agent-lanes/message-log.jsonl`, 对应泳道 `worklog.md`, `agent-lanes/lanes/<lane>/workspace/lane-recovery-*.md`, `agent-lanes/dashboard.md` | 已确认某条泳道线程不可用、过长、需要归档旧线程或替换 `thread_id` 时执行 |
+| 讨论泳道线程崩溃、旧线程过长、主调度无法提交消息、需要新建线程替换和 registry 接管 | `lane-recovery-runner`; 若暴露可复用机制缺口再接 `evolution-runner` | `orchestrator` 或对应故障泳道，必要时 `evolution` | `agent-lanes/agent-registry.json`, `agent-lanes/message-log.jsonl`, 对应泳道 `worklog.md`, `agent-lanes/lanes/<lane>/workspace/lane-recovery-*.md`, `agent-lanes/dashboard.md` | 已确认某条泳道线程不可用、过长、需要归档旧线程或替换 `thread_id` 时执行；新线程必须先做瘦身接管和连续健康检查，二次故障线程不得登记为 current thread |
 
 Hook 结果必须归入四类：
 
 - `capture_only`: 只记录稳定信息，不派发执行任务。
 - `dispatch_needed`: 已形成稳定小任务，派发时必须带 `discussion_source` 或 `source_message_id`，目标泳道 callback 必须能追溯到本次讨论。
-- `confirmation_needed`: 涉及路线锁定、真实外部调用、付费、secret、账号、券商/交易、持久写入、生产声明或重大架构取舍，先给用户确认卡。
+- `confirmation_needed`: 涉及路线锁定、真实外部调用、付费、secret、账号、受监管操作/高风险自动化执行、持久写入、生产声明或重大架构取舍，先给用户确认卡。
 - `clarify_needed`: 信息不足且合理假设会明显跑偏，只问最小必要问题，并记录未决点。
 
 ## 路由原则
@@ -69,3 +69,13 @@ Hook 结果必须归入四类：
 - 如果用户说“跑测试”“门禁”“程序判断”，优先 `gate-runner`。
 - 如果用户显式要求净化/进化 Skill、优化 hook、处理 signals，或用户纠正暴露出可复用流程缺口，优先 `evolution-runner`；单纯“继续/下一步”不要触发它，除非 signal 或 Skill 不适配已经阻塞当前 GOAL。
 - 如果用户问“这套机制怎么用”“什么时候用哪个 Skill”“什么时候写门禁/自进化/派新脑子”，优先 `goal-methodology-guide`。
+
+## Frontend Workflow Planner Hook
+
+当用户讨论“前端底座、前端立项、业务工作台、数据分析前端、图表/事件/表格/关键指标组件、数据层、Design Token、目录结构、模块边界、组件复用、规划端和设计端共用前端流程”时，优先使用 `frontend-workflow-planner`。
+
+路由建议：
+- 只是在讨论前端路线、设计语言、数据层级和工程规则：`frontend-workflow-planner` -> `design` 或 `planning`，结果写入 `docs/02-design-brief.md`、`docs/03-dev-plan.md` 或泳道 workspace。
+- 如果形成了具体开发切片，再由 `dev-planner` 或主调度派 `development`。
+- 如果涉及新依赖、复制外部项目源码、license/source attribution、provider live call、secret、scheduler、真实远程写入、高风险资源或 production feed，先走 `guardian`。
+- 如果用户反馈页面效果不好、结构混乱、组件重复、Figma 与代码不一致，先让 `frontend-workflow-planner` 归因并更新 `docs/frontend/` 对应中间文件，再考虑重新设计或开发。

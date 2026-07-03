@@ -1,4 +1,4 @@
-﻿# GOAL 开发基座
+# GOAL 开发基座
 
 本项目使用文档驱动的 GOAL 工作流。
 
@@ -25,6 +25,92 @@
 ```
 
 每个开发 GOAL 必须说明它补的是哪一环，是否让全链路更接近可运行。如果只是局部优化，必须说明为什么它仍是当前用户可见闭环的直接硬阻塞；否则应把优化放入 backlog 或授权队列，切回最高价值的产品纵向闭环。
+
+## Product Loop First / 用户闭环优先调度
+
+模板部署到目标项目后，主调度必须先定义当前 `active_user_loop`，再派发局部 capability 任务。`active_user_loop` 应写入 `docs/03-dev-plan.md` 或目标项目等价计划文档，格式可以是：
+
+```text
+用户入口 -> 核心对象 -> 关键处理/解释 -> 审核/复盘 -> 输出/交付
+```
+
+从本规则生效后，“持续交付可用产品”优先于“证明每个局部零件安全”。安全、边界和证据仍然保留，但它们服务于用户可用闭环，不能反过来把项目拆成无休止的 `contract -> preview -> browser smoke -> review -> exit -> next gate`。
+
+### Stage Value Gate / 阶段价值门槛
+
+`Product Loop Check` 之前必须先做 `Stage Value Gate`。它回答的不是“这个小闭环能不能做”，而是“它是不是当前阶段最值得做”。主调度不能把辅助分支包装成主线任务，也不能因为某个 callback 建议了下一步就自动照做。
+
+模板部署到目标项目后，必须在 `docs/03-dev-plan.md` 或等价计划文档中定义当前阶段主次。默认格式：
+
+- `P1 主线闭环`: 用户打开产品后必须走通的核心路径，例如入口、核心对象、关键处理/解释、证据/审核、输出/交付。
+- `P2 体验骨架`: 页面层级、导航、关键交互、信息密度、错误状态和用户能否顺着主线完成任务。
+- `P3 可信度/质量`: 真实样本、数据质量、字段含义、source quality blocker、评估质量、稳定性。只有影响主线可信度时才立即推进。
+- `P4 辅助能力`: 备注、导出、保存、偏好设置、二级筛选、批量管理等增强能力。默认进入 backlog，除非用户明确要求或阻塞 P1/P2。
+- `P5 高风险生产化`: 云同步、远程写入、真实账号动作、付费调用、scheduler、自动执行、生产承诺等。默认进入授权/守门阶段。
+
+派发前必须写清：
+
+- `stage_priority`: `P1`、`P2`、`P3`、`P4` 或 `P5`。
+- `why_now`: 为什么现在做它，而不是做更靠前的 P1/P2 主线。
+- `mainline_impact`: `direct_advance`、`blocks_mainline`、`quality_confidence`、`backlog_only` 或 `risk_boundary`。
+- `deferred_items`: 本轮主动放入 backlog 的小分支，尤其是 P4/P5。
+
+硬规则：
+
+- P1/P2 永远优先于 P4/P5；P3 只有在影响主线理解、可信度或验收时才插队。
+- `DONE_WITH_CONCERNS` 里的 concern 默认进入 backlog；只有明确写入 `blocking_concerns` 且阻塞 P1/P2 时，才能触发同类修复。
+- 主调度如果想派 P4/P5，必须说明它为什么是当前 P1/P2 的直接硬阻塞；否则不得派发，只记录 backlog。
+- 用户临时提到一个小想法时，先做需求 intake 和优先级判断；不要立刻把它升级成路线确认卡或开发任务。
+- 当主线不清楚时，下一步不是追小分支，而是派 planning 做 `Stage Value Refresh`，重新列出 3-6 个最高价值纵向切片。
+
+主调度每次派发开发、设计、验收或守门任务前，必须做一次 Product Loop Check，并在派发或 worklog 中写清：
+
+- `stage_priority`: `P1`、`P2`、`P3`、`P4` 或 `P5`。
+- `why_now`: 为什么本轮现在做，而不是做更高优先级主线。
+- `mainline_impact`: `direct_advance`、`blocks_mainline`、`quality_confidence`、`backlog_only` 或 `risk_boundary`。
+- `active_user_loop`: 本轮服务的用户闭环。
+- `loop_impact`: `advanced`、`blocked`、`regression_fixed` 或 `neutral`。普通开发任务不应是 `neutral`；若只是证据补齐，必须说明它解除哪项用户可见交付阻塞。
+- `same_capability_count_last_5`: 最近 5 个相关 GOAL 中同一 capability 的数量。
+- `concern_policy`: 本轮 concern 是 `blocking_concern` 还是 `backlog_concern`。
+- `next_non_same_capability_loop`: 完成后要切回的非同类用户闭环。
+
+所有非主调度泳道 completion callback 也必须携带产品闭环字段，避免主调度只能从自然语言里猜：
+
+- `active_user_loop`: 本轮服务或影响的用户闭环；如果本轮只是验收，也写被验收的闭环。
+- `loop_impact`: `advanced`、`advanced_next_segment`、`blocked`、`regression_fixed`、`neutral` 或 `backlog_only`。
+- `blocking_concerns`: 真正阻塞当前用户闭环继续推进的问题；只有这里的事项能自动触发同能力修复。
+- `backlog_concerns`: 不阻塞当前闭环的质量、性能、体验、bundle、source、真实数据或文档后续项。
+- `recommended_next_type`: `vertical_loop`、`vertical_loop_or_capability_exit`、`blocker_fix`、`boundary_review`、`backlog_only`、`route_choice` 或 `defer_review_until_boundary`。
+- `user_loop_progress`: 验收泳道必须填写，取值为 `advanced`、`neutral`、`blocked` 或 `regression`；其他泳道可选。
+
+节奏约束：
+
+- 同一 capability 连续最多推进 2 个切片；第 3 个默认停止，除非它是当前 `active_user_loop` 的 P1/P2 直接硬阻塞。
+- 连续 3 个任务里至少 1 个必须推进纵向用户闭环，例如从入口到数据、解释、复盘或交付的可操作路径；不能全是 schema、readiness、wrapper、evidence-only、review surface 或 screenshot。
+- `DONE_WITH_CONCERNS` 不自动生成下一条任务。只有 `blocking_concern` 可以进入下一轮派发；`backlog_concern` 只能进入 backlog、roadmap 或后续合并审查。
+- 低风险、本地-only、证据一致的小切片不逐条完整验收；默认合并到阶段边界或用户可见能力声明前验收。
+
+如果下一步不能明确让 `active_user_loop` 前进，主调度必须先做 Skeleton Plan Refresh 或给用户一个路线取舍卡，而不是继续派同类局部能力深挖。
+
+### Next Mainline Slice Selection / 主线自动续航
+
+当一次 `stage_release_record`、阶段合并验收、`current-stage-good-enough` 判断，或没有 `blocking_concerns` 的 `DONE_WITH_CONCERNS` 关闭了当前主线阶段后，主调度不得停在“等待用户下一步”。必须立即执行 `Next Mainline Slice Selection`，自动寻找下一条最值得推进的 P1/P2 主线切片。
+
+执行顺序：
+
+1. 先把 concern 分流：`blocking_concerns` 才能阻塞当前用户闭环；`backlog_concerns` 只能进入 backlog、roadmap、阶段发布记录或后续合并审查，不能让主线停下来。
+2. 如果没有 `blocking_concerns`，把当前阶段视为可继续，选择下一条能推进 `active_user_loop` 的薄纵向切片。
+3. 如果下一条 P1/P2 已经清楚且低风险，直接派发对应泳道，不等用户再说“继续”。
+4. 如果下一条主线不清楚，派 planning 做 `Skeleton Plan Refresh` / `Stage Value Refresh`，要求产出 3-6 个候选主线切片和推荐第一刀。
+5. 每次选择都要在 worklog 或派发记录中写入 `next_mainline_slice_selection`：`source_message_id` 或 `stage_release_record_id`、`blocking_concerns`、`backlog_concerns`、`selected_next_slice`、`stage_priority`、`why_now`、`mainline_impact`、`dispatch_or_plan`。
+
+只有三类事情可以停下来问用户：
+
+- 真实外部调用、付费、secret、账号、受监管操作、高风险自动化执行、远程写入或生产化承诺。
+- 重大产品路线取舍，例如多个 P1/P2 方向都合理但资源优先级冲突。
+- 上下文不足，无法可靠判断当前 P1/P2 主线或验收目标。
+
+除此之外，`DONE_WITH_CONCERNS` 不应让主线停顿；主调度要把非阻塞 concern 收好，然后继续推进下一段主线。
 
 ## Agent Lanes 集成
 
@@ -136,7 +222,7 @@ GOAL -> clarify -> plan -> build -> verify -> independent review -> document -> 
 - `frontend-quality-runner`: 只吸收 `interface-design` 和 `frontend-design` 两个前端设计来源，把信息架构、页面状态、截图验收和可读性问题写回 `docs/02-design-brief.md`、`docs/05-review-report.md` 或 `artifacts/`。
 - `open-source-research-runner`: 吸收 `github-research` 和开源分析方法，把开源候选、license、维护度、依赖和守门边界写回 `docs/08-open-source-reference-pool.md`、`docs/09-research-roadmap.md` 或泳道 workspace。
 - `systematic-debugging-runner`: 吸收系统化调试方法，要求复现、数据流追踪、单假设验证和同路径回归，并把结论写回 `docs/04-goal-log.md`、相关泳道 worklog、`docs/05-review-report.md` 或 artifact。
-- `lane-recovery-runner`: 当泳道线程崩溃、过长、无法提交消息或需要新建替换时，基于持久化运行态文件完成新线程创建、registry 更新、旧线程归档、恢复提示词投递和审计记录。
+- `lane-recovery-runner`: 当泳道线程崩溃、过长、无法提交消息或需要新建替换时，基于持久化运行态文件完成新线程创建、瘦身健康检查、registry 更新、旧线程归档、二次故障归档和审计记录。
 - `evolution-runner`: 在明确边界内把真实失败、用户纠正和稳定项目约束变化转成对本地 Skill、hook、门禁和项目规则的改进。
 - `goal-methodology-guide`: 解释和维护 GOAL 方法论、Skill 使用时机、脚本门禁、自进化和子 Agent 规则。
 
@@ -287,7 +373,7 @@ contract_defined -> dependency_available -> real_smoke_passed -> real_sample_out
 - 本地已安装、不会产生外部费用或远程副作用的依赖，默认应主动进入真实 smoke 或最小真实样本测试。
 - 线上 API、付费模型、外部平台或会改变远程状态的能力，Agent 应主动向用户请求一次明确授权，说明调用目的、输入样例、次数/预算上限、secret 边界和输出复用策略。
 - 用户授权后可以真实调用；调用后必须保存可复用 evidence/artifact，后续门禁默认复用，避免重复消耗。
-- 如果用户给出覆盖一组 provider、模型或依赖的站立授权，主调度应把授权范围、默认调用上限、固定输入、费用上限、secret 不落盘和仍然排除事项写入 `docs/capability-status.json` 或 `docs/capability-provider-contract.md`。后续同范围内安装、dry-run、metadata 检查和受控 smoke 不再逐条打回确认卡；超出范围、需要 token/付费预算、券商/交易、scheduler、生产 feed 或投资建议声明时仍必须重新守门。
+- 如果用户给出覆盖一组 provider、模型或依赖的站立授权，主调度应把授权范围、默认调用上限、固定输入、费用上限、secret 不落盘和仍然排除事项写入 `docs/capability-status.json` 或 `docs/capability-provider-contract.md`。后续同范围内安装、dry-run、metadata 检查和受控 smoke 不再逐条打回确认卡；超出范围、需要 token/付费预算、受监管操作/高风险自动化执行、scheduler、production feed 或合规承诺声明时仍必须重新守门。
 - 用户暂未授权时，允许推进合同、适配、readiness 和排队计划，但必须把 live call 标成 `pending_user_approval`，不能用 fake/check 冒充已接入。
 - 真实 smoke 不等于生产可用；必须继续区分“能跑通”“样本可读”“已接到工作流”“质量通过”“生产可用”。
 - 客户端或浏览器不得直接执行任意本地命令、读取 secret 或绕过受控后端/CLI/API 适配层。

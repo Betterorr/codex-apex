@@ -172,6 +172,12 @@ The original template content is Chinese-first because it was built for Chinese 
 
 This repository is in its first open-source packaging pass. The template is usable today as a Chinese-first canonical operating template with English public entry points and a minimal bootstrap prompt.
 
+Latest template package: `20260703-loop-empty-array-warning-fix`.
+
+- Preserves Next Mainline Slice Selection for automatic follow-up slice routing.
+- Fixes Product Loop warnings so empty `blocking_concerns` and `backlog_concerns` arrays mean no concern, not missing fields.
+- Adds `frontend-workflow-planner` and `VERSION-HISTORY.md` to the portable template.
+
 ## License
 
 MIT

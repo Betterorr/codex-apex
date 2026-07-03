@@ -1,4 +1,4 @@
-﻿# Agent Lanes
+# Agent Lanes
 
 本文件记录长期职责泳道。Agent 线程可以替换，但 Lane 的职责、读写范围、日志和工作区应保持稳定。
 
@@ -62,7 +62,7 @@
 - `orchestrator`: 判断本轮是直接执行，还是先 Plan Refresh；若派发任务，必须说明它补哪条骨架环节。
 - `planning`: 维护 Skeleton Pass、Real Pass、Quality Pass、Production Pass，并给出 3-6 个最高价值薄纵向切片。
 - `development`: 只执行计划中的下一刀；开发前说明补哪条骨架链路，完成后说明下一个非同能力骨架节点。
-- `guardian`: 只在真实 provider/API/账号/成本/交易/外部写入等风险处卡边界，不把普通准备壳层变成独立阶段。
+- `guardian`: 只在真实 provider/API/账号/成本/受监管操作/高风险自动化执行/外部写入等风险处卡边界，不把普通准备壳层变成独立阶段。
 - `review`: 阶段边界检查骨架是否更接近端到端可运行，而不只检查文件是否有改动。
 - `evolution`: 当系统再次陷入局部深挖或骨架判断缺失时，沉淀规则。
 
@@ -80,7 +80,7 @@ Plan Refresh -> Thin Slice Execute -> Focused Verify -> Dashboard/Docs Merge -> 
 
 - `capture_only`: 背景、偏好、观察或仍不稳定的想法。写入合适文档或 message-log，不派发执行任务。
 - `dispatch_needed`: 已经形成稳定小任务。派给合适泳道；线程工具不可用时写 `pending_dispatch` fallback。
-- `confirmation_needed`: 涉及路线锁定、产品取舍、真实外部调用、付费、secret、账号、持久写入、券商/交易、生产声明或重型框架采用。先给用户确认卡，不派发产品化开发。
+- `confirmation_needed`: 涉及路线锁定、产品取舍、真实外部调用、付费、secret、账号、持久写入、受监管操作/高风险自动化执行、生产声明或重型框架采用。先给用户确认卡，不派发产品化开发。
 - `clarify_needed`: 信息不足且合理假设会明显跑偏。只问最小必要问题，并把未决点写入 message-log 或对应文档。
 
 讨论 intake 的最低动作：
@@ -96,7 +96,7 @@ Plan Refresh -> Thin Slice Execute -> Focused Verify -> Dashboard/Docs Merge -> 
 | --- | --- | --- | --- | --- |
 | 探讨需求、产品想法、功能取舍、目标用户、先做什么不做什么 | `product-spec-builder` | `planning` | `docs/01-product-spec.md`, `docs/03-dev-plan.md` | 形成稳定需求切片、验收标准或产品边界时 |
 | 探讨计划、阶段路线、优先级、里程碑、下一轮 GOAL | `dev-planner`; 目标不清时加 `goal-creator` | `planning` 或 `orchestrator` | `docs/03-dev-plan.md`, `docs/04-goal-log.md` | 需要拆任务、定阶段、改优先级或建立 GOAL 时 |
-| 探讨技术方案、架构、数据源、开源库、provider/API、模型或能力接入 | `dev-planner`; 涉及真实调用/secret/条款/成本时加 `gate-runner` 或 `code-reviewer` | `planning`, `guardian`; 确认后才到 `development` | `docs/09-research-roadmap.md`, `docs/13-l1-l5-information-source-architecture.md`, `docs/14-market-candidate-classification.md`, `docs/capability-status.json`, provider card | 低风险调研可派规划；真实 provider/API/模型/付费/账号/交易能力必须先进守门 |
+| 探讨技术方案、架构、数据源、开源库、provider/API、模型或能力接入 | `dev-planner`; 涉及真实调用/secret/条款/成本时加 `gate-runner` 或 `code-reviewer` | `planning`, `guardian`; 确认后才到 `development` | `docs/09-research-roadmap.md`, `docs/13-l1-l5-information-source-architecture.md`, `docs/14-market-candidate-classification.md`, `docs/capability-status.json`, provider card | 低风险调研可派规划；真实 provider/API/模型/付费/账号/受监管操作/高风险自动化执行能力必须先进守门 |
 | 探讨 UI、页面体验、信息架构、交互状态、面板或原型 | `design-brief-builder`; 需要 demo 时加 `prototype-builder` | `design` | `docs/02-design-brief.md` | 有明确页面、用户路径或状态覆盖要求时 |
 | 讨论实现、联调、本地验证、脚本、fixture、端到端样本 | `dev-builder`, `bug-fixer`, `gate-runner` | `development` | `scripts/`, `artifacts/`, `<PRIMARY_MODULE>/`, `docs/03-dev-plan.md`, `docs/capability-status.json` | 需求、边界和风险都清楚时；否则先规划或守门 |
 | 讨论验收、完成判断、证据冲突、风险复核、是否可收工 | `review-runner`, `gate-runner`, `code-reviewer` | `review` | `docs/05-review-report.md`, `agent-lanes/dashboard.md` | 已有产物或 callback 需要独立核对时 |

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -157,6 +158,94 @@ def quality_state(msg: dict[str, Any]) -> str:
     return "正常"
 
 
+LOOP_FIELDS = [
+    "active_user_loop",
+    "loop_impact",
+    "user_loop_progress",
+    "blocking_concerns",
+    "backlog_concerns",
+    "recommended_next_type",
+]
+
+
+def missing_loop_fields(msg: dict[str, Any]) -> list[str]:
+    """Return Product Loop fields missing from recent dispatches/callbacks."""
+    if not (completion_like(msg) or is_dispatch(msg)):
+        return []
+    # callback_batch_ready and callback_spooled are transport records, not lane work.
+    if msg.get("task_type") in {"callback_batch_ready", "callback_spooled", "orchestrator_state"}:
+        return []
+    if is_dispatch(msg):
+        required = ["active_user_loop", "loop_impact"]
+    elif str(msg.get("from_agent") or "") == "review":
+        required = ["user_loop_progress", "blocking_concerns", "backlog_concerns", "recommended_next_type"]
+    else:
+        required = ["active_user_loop", "loop_impact", "blocking_concerns", "backlog_concerns", "recommended_next_type"]
+    return [
+        field
+        for field in required
+        if field not in msg or msg.get(field) is None or msg.get(field) == ""
+    ]
+
+
+def capability_key(msg: dict[str, Any]) -> str:
+    raw = str(msg.get("slice") or msg.get("slice_id") or msg.get("task_type") or msg.get("message_id") or "")
+    text = raw.lower()
+    for prefix in ("md-slice-", "money-digger-"):
+        text = text.replace(prefix, "")
+    parts = [part for part in re.split(r"[^a-z0-9]+", text) if part]
+    stop = {
+        "001",
+        "002",
+        "review",
+        "development",
+        "design",
+        "planning",
+        "dispatch",
+        "reply",
+        "local",
+        "consume",
+        "consumer",
+    }
+    core = [part for part in parts if part not in stop]
+    return "-".join(core[:4]) if core else raw[:80]
+
+
+def recent_loop_warnings(messages: list[dict[str, Any]], window: int = 8) -> list[str]:
+    work_items = [
+        msg
+        for msg in messages
+        if (completion_like(msg) or is_dispatch(msg))
+        and msg.get("task_type") not in {"callback_batch_ready", "callback_spooled", "orchestrator_state"}
+        and not message_is_garbled(msg)
+    ][-window:]
+    warnings: list[str] = []
+    missing = [
+        f"{msg.get('message_id')}: {', '.join(missing_loop_fields(msg))}"
+        for msg in work_items
+        if missing_loop_fields(msg)
+    ]
+    if missing:
+        warnings.append("loop_fields_missing: " + " | ".join(missing[-5:]))
+
+    counts: dict[str, int] = {}
+    advanced_seen: dict[str, bool] = {}
+    for msg in work_items:
+        key = capability_key(msg)
+        if not key:
+            continue
+        counts[key] = counts.get(key, 0) + 1
+        advanced_seen[key] = advanced_seen.get(key, False) or msg.get("user_loop_progress") == "advanced" or str(
+            msg.get("loop_impact") or ""
+        ).startswith("advanced")
+    for key, count in sorted(counts.items(), key=lambda item: item[1], reverse=True):
+        if count >= 3 and not advanced_seen.get(key):
+            warnings.append(
+                f"possible_local_deep_dive: capability={key}, count_last_{window}={count}, no advanced user-loop signal"
+            )
+    return warnings
+
+
 def communication_full_row(msg: dict[str, Any], aliases: dict[str, str]) -> dict[str, str]:
     return {
         "created_at": csv_value(msg.get("created_at")),
@@ -167,6 +256,13 @@ def communication_full_row(msg: dict[str, Any], aliases: dict[str, str]) -> dict
         "communication_type": communication_type(msg),
         "task_type": csv_value(msg.get("task_type")),
         "status": csv_value(msg.get("status")),
+        "active_user_loop": csv_value(msg.get("active_user_loop")),
+        "loop_impact": csv_value(msg.get("loop_impact")),
+        "user_loop_progress": csv_value(msg.get("user_loop_progress")),
+        "blocking_concerns": csv_value(msg.get("blocking_concerns")),
+        "backlog_concerns": csv_value(msg.get("backlog_concerns")),
+        "recommended_next_type": csv_value(msg.get("recommended_next_type")),
+        "loop_field_warnings": csv_value(missing_loop_fields(msg)),
         "delivery_mode": csv_value(msg.get("delivery_mode")),
         "batch_id": csv_value(msg.get("batch_id")),
         "quality_state": quality_state(msg),
@@ -194,6 +290,11 @@ def communication_readable_row(index: int, msg: dict[str, Any], aliases: dict[st
         "去向": lane_label(msg.get("to_agent"), aliases),
         "状态": csv_value(msg.get("status")),
         "质量": quality_state(msg),
+        "active_user_loop": csv_value(msg.get("active_user_loop")),
+        "loop_impact": csv_value(msg.get("loop_impact")),
+        "user_loop_progress": csv_value(msg.get("user_loop_progress")),
+        "recommended_next_type": csv_value(msg.get("recommended_next_type")),
+        "loop_field_warnings": csv_value(missing_loop_fields(msg)),
         "对应任务": csv_value(msg.get("reply_to")),
         "消息编号": csv_value(msg.get("message_id")),
         "摘要": csv_value(msg.get("summary")),
@@ -222,6 +323,11 @@ def export_readable_xlsx(rows: list[dict[str, str]], path: Path) -> bool:
         "去向",
         "状态",
         "质量",
+        "active_user_loop",
+        "loop_impact",
+        "user_loop_progress",
+        "recommended_next_type",
+        "loop_field_warnings",
         "对应任务",
         "消息编号",
         "摘要",
@@ -257,6 +363,11 @@ def export_readable_xlsx(rows: list[dict[str, str]], path: Path) -> bool:
         "去向": 14,
         "状态": 16,
         "质量": 16,
+        "active_user_loop": 46,
+        "loop_impact": 22,
+        "user_loop_progress": 22,
+        "recommended_next_type": 26,
+        "loop_field_warnings": 42,
         "对应任务": 34,
         "消息编号": 38,
         "摘要": 72,
@@ -480,6 +591,7 @@ def main() -> int:
     post_office = latest_post_office_status()
     garbled_messages = [m for m in messages if message_is_garbled(m)]
     current_garbled = [m for m in garbled_messages if str(m.get("created_at") or "") >= "2026-06-24T15:49:29+08:00"]
+    loop_warnings = recent_loop_warnings(messages)
     communication_exports = export_communications_workbook(messages, lane_aliases)
 
     latest_callback_by_lane: dict[str, dict[str, Any]] = {}
@@ -526,6 +638,10 @@ def main() -> int:
         lines.append(f"- 当前质量告警：`{len(current_garbled)}` 条新记录含 `???`，需要对应泳道重发 UTF-8 callback")
     else:
         lines.append("- 当前质量告警：无新乱码回报")
+    if loop_warnings:
+        lines.append(f"- 产品闭环节奏告警：`{len(loop_warnings)}` 条，见下方 `Product Loop 节奏告警`")
+    else:
+        lines.append("- 产品闭环节奏：正常，未发现同能力深挖或关键字段缺失")
     if latest_state:
         state_label = "空闲" if latest_state.get("state") == "idle" else "忙碌"
         lines.append(f"- 主调度状态：{state_label}（{compact(latest_state.get('reason'), 80)}）")
@@ -576,6 +692,15 @@ def main() -> int:
 
     if current_garbled:
         lines.append("## 当前质量告警")
+        lines.append("")
+
+    if loop_warnings:
+        lines.append("## Product Loop 节奏告警")
+        lines.append("")
+        lines.append("这些告警用于防止系统重新滑回局部深挖：字段缺失要补齐；同一 capability 连续出现但没有 `advanced` 信号时，主调度应先做 Product Loop Check。")
+        lines.append("")
+        for warning in loop_warnings:
+            lines.append(f"- `{warning}`")
         lines.append("")
         lines.append("这些记录是在乱码防线启用后出现的，不能当作有效中文回报；应打回对应泳道重新生成 UTF-8 callback。")
         lines.append("")

@@ -26,7 +26,22 @@ agent-lanes/lanes/orchestrator/workspace/orchestrator-recovery-<YYYYMMDD>-<reaso
 
 ## 新主调度接管提示词
 
-把下面整段发给新主调度线程：
+先把下面这段“瘦身健康检查提示词”发给新主调度候选线程。只有候选线程能稳定回复后，才发送后续接管提示词。
+
+```text
+你现在是 <PROJECT_NAME> 项目的主调度泳道候选线程。
+
+这是一次恢复健康检查，不要开始调度，不要读取大量历史。
+
+请只确认三件事：
+1. 你知道自己将接管主调度泳道。
+2. 旧主调度线程 `<OLD_ORCHESTRATOR_THREAD_ID>` 因 `<ERROR_TEXT>` 不再作为投递目标。
+3. 下一步你会先读持久化文件，而不是依赖旧线程临时上下文。
+
+只回复：健康检查通过
+```
+
+健康检查通过后，再发送下面这段接管提示词。若候选线程在健康检查阶段报 `agent loop died unexpectedly`、`failed to start turn` 或 `Error submitting message`，把它标记为二次故障线程并归档，不要继续投递长提示。
 
 ```text
 你现在接管 <PROJECT_NAME> 项目的主调度泳道。
@@ -38,13 +53,15 @@ agent-lanes/lanes/orchestrator/workspace/orchestrator-recovery-<YYYYMMDD>-<reaso
 - agent-lanes/agent-registry.json
 - agent-lanes/agent-lanes.md
 - agent-lanes/dashboard.md
-- agent-lanes/message-log.jsonl 的最近有效记录
+- agent-lanes/message-log.jsonl 的最近有效记录，不要全量读取
 - docs/00-project-state.md
 - docs/03-dev-plan.md
 - docs/04-goal-log.md
 - docs/capability-status.json
 - agent-lanes/lanes/orchestrator/worklog.md
 - agent-lanes/lanes/orchestrator/workspace/orchestrator-recovery-<YYYYMMDD>-<reason>.md
+
+如果这些文件较长，请分批读取。先读 registry、dashboard 和恢复包摘要，确认可用后再逐步读取 worklog、GOAL docs 和最近 message-log。
 
 请直接处理这条旧主调度未完成的事项：
 
@@ -72,7 +89,7 @@ agent-lanes/lanes/orchestrator/workspace/orchestrator-recovery-<YYYYMMDD>-<reaso
 
 ## Registry 替换步骤
 
-新线程创建成功后，更新 `agent-lanes/agent-registry.json`：
+新线程创建并通过至少两次轻量健康检查后，更新 `agent-lanes/agent-registry.json`：
 
 ```json
 {
@@ -83,6 +100,8 @@ agent-lanes/lanes/orchestrator/workspace/orchestrator-recovery-<YYYYMMDD>-<reaso
 ```
 
 不要删除旧线程记录中的历史信息；旧线程 id 应保留在 `notes`、worklog 或恢复包里。
+
+如果第一次新建的候选线程也失败，应把它写入恢复包和审计记录，标记为“历史归档-二次故障”，然后用更短的健康检查提示词创建下一候选线程。不要把失败候选线程登记为当前投递目标。
 
 ## message-log 审计记录模板
 
@@ -118,6 +137,7 @@ agent-lanes/lanes/orchestrator/workspace/orchestrator-recovery-<YYYYMMDD>-<reaso
 ## 完成检查
 
 - `agent-lanes/agent-registry.json` 指向新主调度线程。
+- 新主调度线程已通过至少两次轻量健康检查。
 - `agent-lanes/message-log.jsonl` 可解析，替换记录唯一。
 - 旧主调度线程不再作为投递目标。
 - `agent-lanes/dashboard.md` 已刷新。

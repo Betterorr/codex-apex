@@ -1,4 +1,4 @@
 interface:
   display_name: "泳道恢复执行器"
   short_description: "替换崩溃或过长的泳道线程并维护注册表和审计接管记录"
-  default_prompt: "Use $lane-recovery-runner to replace a broken Agent Lane thread, update registry, archive the old thread, and preserve recovery audit records."
+  default_prompt: "Use $lane-recovery-runner to replace a broken Agent Lane thread with a slim recovery prompt, run lightweight health checks before registry cutover, archive failed threads, and preserve recovery audit records."

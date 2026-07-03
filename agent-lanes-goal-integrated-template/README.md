@@ -1,5 +1,7 @@
 # Agent Lanes 多智能体协作法
 
+> 发布包升级说明见 `VERSION-HISTORY.md`。对外重新打包前必须先追加版本记录，再生成新的 zip 和 manifest。
+
 Agent Lanes 是一套通用的 Codex 多 Agent 项目协作方法：把长期项目拆成多个职责泳道，并通过 Agent 注册表、线程消息、工作日志、产物空间、自动门禁和独立验收协同推进。
 
 ## 快速部署入口

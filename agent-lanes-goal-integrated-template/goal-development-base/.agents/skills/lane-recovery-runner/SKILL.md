@@ -47,6 +47,9 @@ description: 当用户提到泳道坏了、主调度坏了、线程崩了、agen
 - `agent-lanes/message-log.jsonl` 是审计账本；替换动作必须追加记录。
 - 旧线程保留作历史审计，不删除。
 - 不要因为线程坏了就重做业务产物；先恢复调度，再决定下一步。
+- 恢复接管必须先瘦身再加上下文：新线程第一条提示只做身份、故障、少量必读文件和一条短健康检查，不要一次性塞入全部历史、长 dashboard、长 message-log 或大段待处理批次。
+- 新线程创建成功不等于恢复完成；至少要完成连续轻量健康检查，确认它能接收短消息、读取最小持久化文件并稳定回复后，才能把 registry 正式切到新线程。
+- 如果新线程在健康检查或后台投递中再次出现 `agent loop died unexpectedly` / `failed to start turn` / `Error submitting message`，应把它标记为二次故障线程并归档，再创建更轻的候选线程；不要反复给同一个坏线程补发长提示。
 - 如果这次恢复暴露出可复用流程缺口，记录 signal 或派 `evolution-runner` 沉淀规则；不要在恢复流程里顺手改业务代码。
 
 ## 恢复流程
@@ -62,32 +65,40 @@ description: 当用户提到泳道坏了、主调度坏了、线程崩了、agen
 
 3. 新建或确认新线程：
    - 如果用户要求你代建线程，使用线程工具新建项目本地线程。
-   - 新线程初始提示词必须说明它接管哪条泳道、先读哪些持久化文件、要处理哪个未完成事项。
+   - 新线程初始提示词必须采用瘦身接管：说明它接管哪条泳道、旧线程为何不可用、只要求先读 `AGENTS.md`、`agent-registry.json`、`dashboard.md` 和恢复包摘要；不要在第一条提示中粘贴完整 message-log、完整 worklog、完整 dashboard 或多个大段 callback。
+   - 第一条提示应要求新线程只回复一句健康检查，例如“健康检查通过”，不要立刻执行复杂调度。
    - 如果线程工具不可用，不要虚构 id；把新线程标为 `pending_setup` 并说明阻塞。
 
-4. 更新 registry：
+4. 健康检查与二次故障判定：
+   - 对新线程做至少两次轻量健康检查：一次确认能启动并短回复，一次确认能读取最小持久化文件或恢复包摘要。
+   - 健康检查通过前，不要把复杂待处理批次、长 callback、全量 message-log 或大段项目历史投递给新线程。
+   - 如果新线程健康检查失败，记录错误原文、后台投递结果和失败时间，把该线程改为“历史归档-二次故障”或等价审计状态。
+   - 二次故障后重新创建候选线程时，进一步缩短接管提示，只保留项目名、泳道名、旧线程 id、恢复包路径和“先回复可用”的测试指令。
+
+5. 更新 registry：
    - 修改 `agent-lanes/agent-registry.json` 中对应泳道的 `thread_id`。
    - 更新 `last_seen_at`。
    - 在 `notes` 保留旧线程 id、替换时间和原因。
    - 保持 `display_name` / 泳道名可读；如果新线程沿用原名，旧线程应改成历史归档名。
+   - 只有健康检查通过后，才把该线程登记为当前投递目标；健康检查失败的候选线程只进入 notes、worklog 或恢复包审计，不作为 current thread。
 
-5. 线程标题和归档：
+6. 线程标题和归档：
    - 如果可用，给新线程设置原泳道名，例如 `主调度泳道`。
    - 给旧线程加历史标记，例如 `主调度泳道（历史归档-YYYYMMDD）`。
    - 如果可用，归档旧线程。
    - 归档失败不是恢复阻塞，但必须记录 concern。
 
-6. 追加审计：
+7. 追加审计：
    - 在 `agent-lanes/message-log.jsonl` 追加 `task_type=lane_thread_replacement` 或 `orchestrator_thread_replacement`。
-   - 审计记录正文可使用英文 agent key，避免 PowerShell 编码把中文写成 `????`。
+   - 审计记录正文可使用英文 agent key，避免 PowerShell 编码把中文写成 `目标项目`。
    - 记录 `old_thread_id`、`new_thread_id`、`changed_files`、`evidence`、`concerns` 和 `next_recommended_action`。
 
-7. 更新 worklog 和 dashboard：
+8. 更新 worklog 和 dashboard：
    - 在对应泳道 `worklog.md` 追加替换记录。
    - 运行 `python agent-lanes\scripts\render_dashboard.py`。
    - 如项目有 `communications-readable.xlsx`，确认刷新命令已生成。
 
-8. 验证：
+9. 验证：
    - JSON parse `agent-lanes/agent-registry.json`。
    - JSONL parse `agent-lanes/message-log.jsonl`。
    - 确认对应泳道 `thread_id` 是新线程。
@@ -111,10 +122,11 @@ description: 当用户提到泳道坏了、主调度坏了、线程崩了、agen
 完成前必须满足：
 
 - 新线程已创建或明确阻塞为 `pending_setup`。
+- 新线程已通过至少两次轻量健康检查，或健康检查失败已记录为二次故障并未切换为 current thread。
 - `agent-lanes/agent-registry.json` 指向新线程，或阻塞原因已记录。
 - 旧线程不再作为投递目标。
 - 恢复包已写入对应泳道 workspace。
-- `agent-lanes/message-log.jsonl` 已追加可解析审计记录，且没有新增 `???` 乱码污染。
+- `agent-lanes/message-log.jsonl` 已追加可解析审计记录，且没有新增 `数据` 乱码污染。
 - 对应泳道 worklog 已追加记录。
 - dashboard 已刷新，或说明无法刷新原因。
 
@@ -126,5 +138,7 @@ description: 当用户提到泳道坏了、主调度坏了、线程崩了、agen
 - 只改了线程标题，没有更新 `agent-registry.json`。
 - 只在聊天里说明，没有写恢复包、worklog 或 message-log 审计。
 - 把旧线程删除，导致历史不可追溯。
-- `message-log.jsonl` 新增记录不可 JSON 解析，或出现新 `???` 乱码污染。
+- `message-log.jsonl` 新增记录不可 JSON 解析，或出现新 `数据` 乱码污染。
 - 未处理 pending callback / 未完成任务，也没有把它交给新线程。
+- 新线程尚未通过健康检查，却已把 registry 切到该线程并宣称恢复完成。
+- 新线程已经出现二次 `agent loop died unexpectedly`，仍继续向它投递长上下文或真实任务。

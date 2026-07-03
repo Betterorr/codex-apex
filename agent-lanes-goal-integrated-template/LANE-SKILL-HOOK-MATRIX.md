@@ -17,7 +17,7 @@
 | 规划泳道 `planning` | 需求、范围、验收标准、阶段计划、骨架计划 | `product-spec-builder`, `dev-planner`, `goal-creator`, `requirements-traceability-runner` | 需求、PRD、MVP、先做什么、开发计划、阶段路线、需求追踪、traceability matrix、Skeleton Plan Refresh | `docs/01-product-spec.md`, `docs/03-dev-plan.md`, `docs/05-review-report.md`, planning worklog/workspace |
 | 设计泳道 `design` | UI/UX、信息架构、页面状态、原型、前端体验标准 | `design-brief-builder`, `prototype-builder`, `frontend-quality-runner` | UI、UX、页面怎么设计、交互、信息架构、原型、Figma、前端质感、页面可读性、浏览器截图验收 | `docs/02-design-brief.md`, `docs/05-review-report.md`, `artifacts/<slice>/`, design worklog/workspace |
 | 开发泳道 `development` | 实现、修 bug、联调、局部门禁、真实样本/fixture 接线 | `dev-builder`, `bug-fixer`, `gate-runner`, `systematic-debugging-runner` | 实现、开始开发、改代码、联调、跑起来、bug、报错、测试失败、先查根因、门禁、真实 smoke | 业务代码、`scripts/`, `artifacts/`, `docs/04-goal-log.md`, capability registry 更新 |
-| 守门泳道 `guardian` | 权限、secret、外部 API、账号、付费、发布、安全、provider 边界 | `gate-runner`, `code-reviewer`, `goal-methodology-guide`, `open-source-research-runner` | secret、付费 API、账号、外部 provider、真实调用、license、权限、安全、生产声明、交易/远程写入 | `docs/capability-status.json`, `docs/capability-provider-contract.md`, guardian worklog/workspace |
+| 守门泳道 `guardian` | 权限、secret、外部 API、账号、付费、发布、安全、provider 边界 | `gate-runner`, `code-reviewer`, `goal-methodology-guide`, `open-source-research-runner` | secret、付费 API、账号、外部 provider、真实调用、license、权限、安全、生产声明、受监管操作/高风险自动化执行/远程写入 | `docs/capability-status.json`, `docs/capability-provider-contract.md`, guardian worklog/workspace |
 | 验收泳道 `review` | 独立验收、证据核对、代码审查、需求覆盖、阶段边界复核 | `review-runner`, `code-reviewer`, `gate-runner`, `requirements-traceability-runner`, `frontend-quality-runner` | 检查是否完成、验收、证据够不够、代码审查、完成了吗、需求覆盖、前后端是否对齐、UI 截图验收 | `docs/05-review-report.md`, `docs/06-release-record.md`, review worklog/workspace |
 | 进化泳道 `evolution` | 沉淀重复失败、改模板、改 hook、改门禁、skill 适配；把稳定的泳道恢复动作沉淀成模板规则 | `evolution-runner`, `goal-methodology-guide`, `systematic-debugging-runner`, `lane-recovery-runner` | 进化、沉淀规则、模板升级、hook 设置、skill 适配、规则膨胀、callback 机制不对、信息流断了、泳道恢复流程固化 | 模板目录、`.agents/skills/`, `.codex/hooks/`, `.codex/gates/`, evolution worklog |
 
@@ -70,6 +70,6 @@ powershell -ExecutionPolicy Bypass -File scripts\check-skill-mechanism.ps1
 
 - 输出文件必须接入当前 GOAL 文档体系，例如 `docs/01-product-spec.md`、`docs/02-design-brief.md`、`docs/03-dev-plan.md`、`docs/05-review-report.md` 或泳道 workspace。
 - 不允许另起一套旁路文档体系，让其他泳道读不到。
-- 不允许绕过守门直接引入会触发账号、secret、付费、远程写入、真实 provider、生产发布或交易风险的能力。
+- 不允许绕过守门直接引入会触发账号、secret、付费、远程写入、真实 provider、生产发布、受监管操作或高风险自动化执行风险的能力。
 - 只提升速度、但不能明显提升质量或降低风险的 skill，不进入默认推荐。
 - 改造后必须更新 `SKILL-RECOMMENDATIONS.md`、`skill-hooks.md` 和机制门禁。

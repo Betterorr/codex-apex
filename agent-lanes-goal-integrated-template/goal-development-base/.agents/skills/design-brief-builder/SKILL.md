@@ -70,6 +70,14 @@ description: 当用户提到设计、设计规范、设计 brief、UI、UX、交
 - `docs/01-product-spec.md`
 - `docs/CHANGELOG.md`
 
+如果本轮作为 design 泳道 completion callback 回报，JSON 必须额外包含：
+
+- `active_user_loop`: 本轮设计服务的用户闭环。
+- `loop_impact`: `advanced`、`blocked`、`regression_fixed` 或 `neutral`；普通设计任务不应只停在 `neutral`。
+- `blocking_concerns`: 真正阻塞当前用户闭环的设计问题。
+- `backlog_concerns`: 不阻塞当前闭环、应进入 backlog 或阶段合并审查的设计质量项。
+- `recommended_next_type`: `vertical_loop`、`blocker_fix`、`boundary_review`、`backlog_only` 或 `defer_review_until_boundary`。
+
 ## 信号记录
 
 当用户纠正审美方向、信息架构、原型复用方式或交互边界时，在 `.codex/signals/` 记录 signal。
@@ -77,3 +85,9 @@ description: 当用户提到设计、设计规范、设计 brief、UI、UX、交
 ## 完成门禁
 
 只有当 `prototype-builder` 或 `dev-planner` 可以不发明主布局、状态、交互模型和视觉方向时，设计 Brief 才算完成。
+
+## 与前端工作流 Skill 的协作
+
+当设计任务涉及前端底座、前端工作台、图表/事件/表格/关键业务组件、数据层级、UI 组件库、目录结构、模块边界、Design Token、主题、多语言或规划端/设计端共用前端流程时，先使用 `frontend-workflow-planner`。
+
+设计 Brief 必须吸收它输出的 `design_language`、`data_contract`、`module_boundaries`、`reuse_rules`、`design_tokens` 和 `acceptance_evidence`，再写入 `docs/02-design-brief.md`。如果这些字段缺失，设计泳道应打回澄清，不要直接进入页面设计。

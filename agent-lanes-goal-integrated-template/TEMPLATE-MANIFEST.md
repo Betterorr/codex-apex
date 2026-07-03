@@ -1,5 +1,7 @@
 # Agent Lanes + GOAL 模板包材料清单
 
+> 对外发布版本记录见 `VERSION-HISTORY.md`。每次模板包更新都必须同步写入版本升级说明。
+
 本文件用于把模板包复制到其他项目时做核对。新项目部署时，优先阅读 `DEPLOY-PROMPT.md`，再按本清单确认材料是否齐全。
 
 ## 一键部署入口
@@ -8,6 +10,7 @@
 - `scripts/deploy_agent_lanes_template.py`：可选部署辅助脚本，默认只创建缺失文件，不覆盖已有运行态。
 - `README.md`：Agent Lanes 基础说明和启用步骤。
 - `README-GOAL-INTEGRATED.md`：Agent Lanes 与 GOAL 开发基座集成说明。
+- `VERSION-HISTORY.md`：模板包对外发布和版本升级说明；每次重新打包前必须追加记录。
 - `BOOTSTRAP-PROMPT.md` / `BOOTSTRAP-PROMPT-GOAL-INTEGRATED.md`：初始化泳道时使用的启动提示词。
 
 ## 运行态模板
@@ -27,7 +30,7 @@
 - `EVOLUTION-NOTES.md`：进化泳道可复用规则沉淀入口。
 - `SKILL-RECOMMENDATIONS.md`：质量优先 skill 候选池和外部 skill 引入规则。
 - `tooling-notes.md`：工具可用性和部署注意事项。
-- 已吸收并随包交付的本地化增强 skill：`requirements-traceability-runner`、`frontend-quality-runner`、`open-source-research-runner`、`systematic-debugging-runner`、`lane-recovery-runner`；其中 `frontend-quality-runner` 只吸收 `interface-design` 和 `frontend-design` 两个前端设计来源，`lane-recovery-runner` 固化泳道线程崩溃、过长、无法提交消息时的新线程接管、registry 替换、旧线程归档和审计恢复流程。新项目默认优先使用这些适配版，不直接把原始外部 skill 作为默认入口。
+- 已吸收并随包交付的本地化增强 skill：`requirements-traceability-runner`、`frontend-quality-runner`、`open-source-research-runner`、`systematic-debugging-runner`、`lane-recovery-runner`；其中 `frontend-quality-runner` 只吸收 `interface-design` 和 `frontend-design` 两个前端设计来源，`lane-recovery-runner` 固化泳道线程崩溃、过长、无法提交消息时的新线程接管、瘦身健康检查、registry 替换、旧线程归档、二次故障归档和审计恢复流程。新项目默认优先使用这些适配版，不直接把原始外部 skill 作为默认入口。
 
 ## 邮局回报机制
 
@@ -44,9 +47,10 @@
 - 邮局不得把 pending callback 移出暂存，除非同一批次已经生成可发送的完整 `thread_prompt`、`target_thread_id` 和 `outbox_path`。
 - 主调度收到 `【邮局合并回报】` 后直接处理原文，不先要求“去 message-log 读取完整 callback”。
 - `thread_prompt` 必须完整展开 `summary`、`changed_files`、`evidence`、`concerns`、`next_recommended_action` 等回报字段，不用“另有 X 项，见审计日志”代替正文。
+- 新回报应携带 Product Loop 字段：`active_user_loop`、`loop_impact`、`blocking_concerns`、`backlog_concerns`、`recommended_next_type`；review 回报还必须携带 `user_loop_progress`。缺字段不会阻止投递，但会在 dashboard / xlsx 标为 `loop_field_warnings`。
 - 只有证据冲突、疑似重复、门禁报错、需要审计或用户要求追溯时，才打开 `message-log.jsonl` 查证。
 - `legacy_direct_bypass_message_ids` 和 `legacy_stranded_delivery_message_ids` 只能用于已解释的历史迁移期记录。新项目默认保持空数组；未来新 completion callback 绕过邮局或只停在 `spooled`/`batched_log` 仍必须报警或打回。
-- `deliver_callback.py` 会拒绝明显乱码的 callback，例如连续 `???` 或全问号 agent 名；`legacy_garbled_payload_message_ids` 只能记录已发送的历史乱码污染，新项目默认保持空数组。
+- `deliver_callback.py` 会拒绝明显乱码的 callback，例如连续 `数据` 或全问号 agent 名；`legacy_garbled_payload_message_ids` 只能记录已发送的历史乱码污染，新项目默认保持空数组。
 
 ## Dashboard 与门禁
 

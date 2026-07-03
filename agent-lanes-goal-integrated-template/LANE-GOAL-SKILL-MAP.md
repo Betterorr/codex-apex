@@ -1,4 +1,4 @@
-﻿# Lane To GOAL Skill Map
+# Lane To GOAL Skill Map
 
 这份映射说明 Agent Lanes 和 GOAL skills 如何配合。
 
@@ -31,7 +31,7 @@
 
 - `capture_only`: 背景、偏好、观察或未稳定想法，写入文档或 message-log。
 - `dispatch_needed`: 稳定小任务，派给对应泳道，或写 `pending_dispatch` fallback。
-- `confirmation_needed`: 路线锁定、产品取舍、真实外部调用、付费、secret、账号、持久写入、券商/交易、生产声明或重型框架采用，先给用户确认卡。
+- `confirmation_needed`: 路线锁定、产品取舍、真实外部调用、付费、secret、账号、持久写入、受监管操作/高风险自动化执行、生产声明或重型框架采用，先给用户确认卡。
 - `clarify_needed`: 信息不足且容易跑偏，只问最小必要问题。
 
 主调度派发讨论产生的任务时，必须带 `discussion_source` 或 `source_message_id`；目标泳道 callback 必须能说明处理的是哪次讨论产生的事项。
@@ -48,7 +48,7 @@
 | 讨论验收、完成判断、证据冲突、风险复核、是否可收工 | `review-runner`, `gate-runner`, `code-reviewer` | `review` |
 | 讨论机制、模板、hook、skill、泳道协作、重复摩擦或规则进化 | `evolution-runner`, `goal-methodology-guide` | `evolution` |
 
-如果场景涉及路线锁定、真实 provider/API/模型/付费/secret/账号/券商或交易能力，先进入 `confirmation_needed` 或 `guardian`，不得直接派发 `development`。
+如果场景涉及路线锁定、真实 provider/API/模型/付费/secret/账号/受监管操作或高风险自动化执行能力，先进入 `confirmation_needed` 或 `guardian`，不得直接派发 `development`。
 
 ## 多泳道协作瘦身规则
 
@@ -68,7 +68,7 @@
 - 真实缺陷、测试失败或行为异常时，优先 `bug-fixer` 和 `systematic-debugging-runner`，先定位根因再修复。
 - 用户可见 UI 闭环或浏览器行为需要验证时，优先 `playwright` 或 `e2e-testing`。
 - 高风险、跨模块、阶段边界、发布前或用户可见完成声明，优先 `code-reviewer` 和 `review-runner`。
-- 开源库、provider、指标库、回测框架、图表库或外部实现选型时，使用 `open-source-research-runner`；原始 `github-research` 或同类开源分析 skill 只作为临时深挖工具。引入代码前必须检查 license、维护度和守门边界。
+- 开源库、provider、算法/指标库、评估框架、图表库或外部实现选型时，使用 `open-source-research-runner`；原始 `github-research` 或同类开源分析 skill 只作为临时深挖工具。引入代码前必须检查 license、维护度和守门边界。
 - 只有现有 skill 不能覆盖明确质量缺口时，才用 `skill-finder` 搜索外部候选；搜索结果必须先复核文档，不因安装量高就直接进入默认流程。
 
 只提升操作速度、但不能明显提升质量或降低风险的 skill，不进入默认推荐。会引入账号、secret、付费、远程写入、真实 provider 或重型框架的 skill，必须先走守门泳道或用户确认。
@@ -111,7 +111,7 @@ Plan Refresh -> Thin Slice Execute -> Focused Verify -> Dashboard/Docs Merge -> 
 - 主调度泳道：判断是否需要 Skeleton Plan Refresh。
 - 规划泳道：维护产品骨架路线，输出 Skeleton Pass、Real Pass、Quality Pass、Production Pass 和 3-6 个最高价值薄纵向切片。
 - 开发泳道：只执行骨架计划里的下一刀，说明补哪条骨架环节和下一个非同能力节点。
-- 守门泳道：卡真实 provider/API/secret/账号/成本/交易/外部写入边界。
+- 守门泳道：卡真实 provider/API/secret/账号/成本/受监管操作/高风险自动化执行/外部写入边界。
 - 验收泳道：检查产物是否让骨架更接近端到端可运行。
 
 ## GOAL 文档写入归属

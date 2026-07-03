@@ -21,7 +21,7 @@ from typing import Any
 
 
 TZ = timezone(timedelta(hours=8))
-DEFAULT_ORCHESTRATOR_THREAD_ID = "pending_setup"
+DEFAULT_ORCHESTRATOR_THREAD_ID = "019ef409-0af6-7702-954d-00e9cc83b0bc"
 
 
 def now_text() -> str:
@@ -101,6 +101,20 @@ def validate_callback_text_quality(callback: dict[str, Any], path: Path) -> None
         )
 
 
+def callback_loop_field_warnings(callback: dict[str, Any]) -> list[str]:
+    if callback.get("task_type") in {"callback_batch_ready", "callback_spooled", "orchestrator_state"}:
+        return []
+    if str(callback.get("from_agent") or "") == "review":
+        required = ["user_loop_progress", "blocking_concerns", "backlog_concerns", "recommended_next_type"]
+    else:
+        required = ["active_user_loop", "loop_impact", "blocking_concerns", "backlog_concerns", "recommended_next_type"]
+    return [
+        field
+        for field in required
+        if field not in callback or callback.get(field) is None or callback.get(field) == ""
+    ]
+
+
 def pid_is_running(pid: int) -> bool:
     if pid <= 0:
         return False
@@ -154,21 +168,6 @@ def read_callback(path: Path) -> dict[str, Any]:
     callback.setdefault("created_at", now_text())
     validate_callback_text_quality(callback, path)
     return callback
-
-
-def resolve_orchestrator_thread_id(project_root: Path, explicit_value: str | None) -> str:
-    if explicit_value and explicit_value != DEFAULT_ORCHESTRATOR_THREAD_ID:
-        return explicit_value
-    registry_path = project_root / "agent-lanes" / "agent-registry.json"
-    if registry_path.exists():
-        try:
-            registry = json.loads(registry_path.read_text(encoding="utf-8-sig"))
-            for agent in registry.get("agents", []):
-                if agent.get("agent_id") == "orchestrator" and agent.get("thread_id"):
-                    return str(agent["thread_id"])
-        except (OSError, json.JSONDecodeError):
-            pass
-    return os.environ.get("AGENT_LANES_ORCHESTRATOR_THREAD_ID", DEFAULT_ORCHESTRATOR_THREAD_ID)
 
 
 def spool_callback(project_root: Path, callback: dict[str, Any]) -> Path:
@@ -227,11 +226,7 @@ def main() -> int:
     parser.add_argument("--poll-interval-seconds", type=int, default=60)
     parser.add_argument("--max-wait-seconds", type=int, default=0)
     parser.add_argument("--no-start", action="store_true", help="Only spool; do not start the background post office.")
-    parser.add_argument(
-        "--orchestrator-thread-id",
-        default=None,
-        help="Defaults to agent-lanes/agent-registry.json orchestrator.thread_id, then AGENT_LANES_ORCHESTRATOR_THREAD_ID, then pending_setup.",
-    )
+    parser.add_argument("--orchestrator-thread-id", default=DEFAULT_ORCHESTRATOR_THREAD_ID)
     args = parser.parse_args()
 
     if args.poll_interval_seconds < 1:
@@ -240,14 +235,14 @@ def main() -> int:
         raise SystemExit("--max-wait-seconds must be >= 0")
 
     project_root = Path(args.project_root).resolve()
-    orchestrator_thread_id = resolve_orchestrator_thread_id(project_root, args.orchestrator_thread_id)
     callback = read_callback(Path(args.callback_file).resolve())
+    loop_field_warnings = callback_loop_field_warnings(callback)
     spool_path = spool_callback(project_root, callback)
 
     deadline = time.time() + args.max_wait_seconds
     post_office_result: dict[str, Any] = {"status": "not_checked"}
     while True:
-        post_office_result = run_post_office_once(project_root, args.poll_interval_seconds, orchestrator_thread_id)
+        post_office_result = run_post_office_once(project_root, args.poll_interval_seconds, args.orchestrator_thread_id)
         if post_office_result.get("status") == "ready_to_send":
             break
         if args.max_wait_seconds == 0 or time.time() >= deadline:
@@ -259,7 +254,7 @@ def main() -> int:
     started_pid: int | None = None
     running = post_office_running(pid_path)
     if post_office_result.get("status") != "ready_to_send" and not running and not args.no_start:
-        started_pid = start_post_office(project_root, args.poll_interval_seconds, orchestrator_thread_id)
+        started_pid = start_post_office(project_root, args.poll_interval_seconds, args.orchestrator_thread_id)
         running = True
 
     batch = post_office_result.get("batch") or {}
@@ -271,10 +266,18 @@ def main() -> int:
         "post_office_status": post_office_result.get("status"),
         "post_office_running": running,
         "post_office_started_pid": started_pid,
-        "target_thread_id": batch.get("target_thread_id", orchestrator_thread_id),
+        "target_thread_id": batch.get("target_thread_id", args.orchestrator_thread_id),
         "outbox_path": batch.get("outbox_path"),
         "send_required": bool(thread_prompt),
         "thread_prompt": thread_prompt,
+        "quality_warnings": {
+            "missing_product_loop_fields": loop_field_warnings,
+            "recommendation": (
+                "Add active_user_loop/loop_impact and concern split fields to the callback before the next lane reply."
+                if loop_field_warnings
+                else ""
+            ),
+        },
         "instruction": (
             "Call send_message_to_thread once with target_thread_id and thread_prompt."
             if thread_prompt

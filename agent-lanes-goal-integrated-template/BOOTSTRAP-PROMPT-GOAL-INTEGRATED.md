@@ -28,6 +28,7 @@
 
 1. 先读取模板核心文件：
    - README-GOAL-INTEGRATED.md
+   - VERSION-HISTORY.md
    - LANE-GOAL-SKILL-MAP.md
    - LANE-SKILL-HOOK-MATRIX.md
    - PERSISTENT-RUNTIME-FILES.md
@@ -100,7 +101,7 @@
 
 7. 把 GOAL skills 映射到泳道职责：
    - 主调度泳道主要使用 `project-orchestrator`；目标、范围、完成标准或验证方式不清时再按需使用 `goal-creator`。
-   - 主调度泳道线程崩溃、过长、无法提交消息或需要新线程接管时，使用 `lane-recovery-runner`，并按 `PERSISTENT-RUNTIME-FILES.md` 与 `orchestrator-recovery-template.md` 更新 registry、归档旧线程和写审计记录。
+   - 主调度泳道线程崩溃、过长、无法提交消息或需要新线程接管时，使用 `lane-recovery-runner`，并按 `PERSISTENT-RUNTIME-FILES.md` 与 `orchestrator-recovery-template.md` 先做瘦身接管和连续健康检查，再更新 registry、归档旧线程和写审计记录；若候选新线程二次崩溃，标记为二次故障并创建更轻候选线程。
    - 规划泳道使用 `product-spec-builder`；跨泳道依赖、阶段顺序、联调路线、风险或验证方式不清时再按需使用 `dev-planner`、`goal-creator`。
    - 设计泳道使用 `design-brief-builder`、`prototype-builder`。
    - 开发泳道使用 `dev-builder`、`bug-fixer`、`gate-runner`。
@@ -117,7 +118,7 @@
    - `dispatch_needed` 派给合适泳道；线程工具不可用时写 `pending_dispatch` fallback。
    - `confirmation_needed` 先给用户确认卡，不派发产品化开发。
    - `clarify_needed` 只问最小必要问题，并记录未决点。
-   - 初始化 `.codex/hooks/skill-hooks.md` 中的“讨论场景 Hook 矩阵”：探讨需求走 `product-spec-builder`/规划泳道；探讨计划走 `dev-planner` 或 `goal-creator`/规划泳道；探讨技术方案、数据源、provider/API、模型能力时先走 `dev-planner`，涉及真实调用、secret、成本、账号或交易时走守门泳道；探讨 UI 走设计泳道；讨论实现和联调才走开发泳道；讨论验收走验收泳道；讨论机制和模板走进化泳道。
+   - 初始化 `.codex/hooks/skill-hooks.md` 中的“讨论场景 Hook 矩阵”：探讨需求走 `product-spec-builder`/规划泳道；探讨计划走 `dev-planner` 或 `goal-creator`/规划泳道；探讨技术方案、数据源、provider/API、模型能力时先走 `dev-planner`，涉及真实调用、secret、成本、账号、受监管操作或高风险自动化执行时走守门泳道；探讨 UI 走设计泳道；讨论实现和联调才走开发泳道；讨论验收走验收泳道；讨论机制和模板走进化泳道。
    - 派发任务必须带 `discussion_source` 或 `source_message_id`，让 completion callback 能追溯到触发讨论。
 
 9. 建立 `Sketch Plan Loop / 骨架计划循环`：
