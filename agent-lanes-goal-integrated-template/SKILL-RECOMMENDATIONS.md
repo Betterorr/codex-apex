@@ -40,7 +40,7 @@ npx -y skills find "<keywords>"
 
 外部候选必须先复核文档、安装命令、适用边界和与本项目模板的冲突，再决定是否安装。不要因为安装量高就默认加入主流程。
 
-使用 `open-source-research-runner` 或临时补充 `github-research` 时，适合开源库、论文实现、provider、回测/图表/数据处理库选型。默认要求：
+使用 `open-source-research-runner` 或临时补充 `github-research` 时，适合开源库、论文实现、provider、验证引擎、可视化或数据处理库选型。默认要求：
 
 - `gh` CLI 已安装并已认证。
 - 允许网络访问和浅克隆仓库。

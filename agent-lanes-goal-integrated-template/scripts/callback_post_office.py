@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Batch lane callbacks and prepare one direct thread message.
 
-The post office keeps ``message-log.jsonl`` as an audit log, but the user-facing
-handoff is the generated ``thread_prompt``. A lane that runs the delivery script
-must send that one prompt to the orchestrator thread with ``send_message_to_thread``.
+Business callbacks are stored in ``message-log.jsonl``. Post-office spooling,
+batching and orchestrator state live in ``transport-log.jsonl`` so transport
+noise does not dominate the product audit trail. The user-facing handoff is the
+generated ``thread_prompt``. A lane that runs the delivery script must send that
+one prompt to the orchestrator thread with ``send_message_to_thread``.
 The script must not move callbacks out of ``pending`` unless it can also return
 or persist a complete ``thread_prompt`` for the same batch.
 """
@@ -72,7 +74,7 @@ def append_jsonl(path: Path, row: dict[str, Any]) -> None:
 
 def write_json(path: Path, row: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(row, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+    path.write_text(json.dumps(row, ensure_ascii=False, indent=2) + "\n", encoding="utf-8-sig", newline="\n")
 
 
 def read_callback(path: Path) -> dict[str, Any]:
@@ -189,10 +191,16 @@ def build_thread_prompt(batch_id: str, callbacks: list[dict[str, Any]], reason: 
         next_lane = lane_label(callback.get("next_recommended_lane"))
         next_action = full_text(callback.get("next_recommended_action"))
         reply_to = callback.get("reply_to")
+        value_slice_id = callback.get("value_slice_id")
+        value_delta = callback.get("value_delta")
 
         lines.append(f"{index}. {source} · {status}")
         if reply_to:
             lines.append(f"   对应任务：{reply_to}")
+        if value_slice_id:
+            lines.append(f"   Value Slice：{value_slice_id}")
+        if value_delta:
+            lines.append(f"   用户价值变化：{full_text(value_delta)}")
         if summary:
             lines.append(f"   原文摘要：{summary}")
         lines.extend(bullet_block("证据", as_list(callback.get("evidence"))))
@@ -203,13 +211,15 @@ def build_thread_prompt(batch_id: str, callbacks: list[dict[str, Any]], reason: 
         else:
             lines.append("   风险/关注点：无阻塞风险。")
         if callback.get("next_recommended_lane") or next_action:
-            lines.append(f"   建议下一泳道：{next_lane or '-'}")
+            lines.append(f"   咨询性下一泳道建议：{next_lane or '-'}")
         if next_action:
             lines.append(f"   建议动作：{next_action}")
         lines.append("")
 
     lines.append("主调度处理要求：")
     lines.append("- 直接基于本合并消息做下一步判断。")
+    lines.append("- 泳道的下一步建议只作咨询，不能直接触发派发。")
+    lines.append("- 新派发必须绑定 Value Slice，并先通过 product_value_gate.py。")
     lines.append("- 不要再回复“我去 message-log 读取完整 callback”。")
     lines.append("- 只有证据冲突、需要审计或疑似重复时，才打开 message-log 查证。")
     lines.append(f"批次编号：{batch_id}")
@@ -220,7 +230,8 @@ def build_thread_prompt(batch_id: str, callbacks: list[dict[str, Any]], reason: 
 def drain_pending(
     project_root: Path,
     inbox_root: Path,
-    log_path: Path,
+    business_log_path: Path,
+    transport_log_path: Path,
     reason: str,
     orchestrator_thread_id: str,
 ) -> dict[str, Any]:
@@ -234,7 +245,7 @@ def drain_pending(
     delivered_dir.mkdir(parents=True, exist_ok=True)
     outbox_dir.mkdir(parents=True, exist_ok=True)
 
-    rows = read_jsonl(log_path)
+    rows = read_jsonl(business_log_path)
     callback_ids: list[str] = []
     callbacks: list[dict[str, Any]] = []
     summaries: list[dict[str, str]] = []
@@ -251,19 +262,22 @@ def drain_pending(
                 "summary": compact(callback.get("summary"), 180),
             }
         )
-        append_callback_if_missing(log_path, rows, callback)
+        append_callback_if_missing(business_log_path, rows, callback)
         shutil.move(str(path), str(delivered_dir / path.name))
 
     thread_prompt = build_thread_prompt(batch_id, callbacks, reason)
     message_path = delivered_dir / "orchestrator-message.md"
-    message_path.write_text(thread_prompt, encoding="utf-8", newline="\n")
+    message_path.write_text(thread_prompt, encoding="utf-8-sig", newline="\n")
 
     outbox = {
         "message_id": f"{batch_id}-thread-send",
         "batch_id": batch_id,
         "target_thread_id": orchestrator_thread_id,
         "thread_prompt": thread_prompt,
+        "orchestrator_message_path": message_path.relative_to(project_root).as_posix(),
         "status": "READY_TO_SEND",
+        "delivery_state": "ready_to_send_or_retry",
+        "retry_note": "如果 send_message_to_thread 返回 no active turn to steer 或目标线程不可接管，请重试本 outbox 的 thread_prompt，不要让泳道重做业务任务。",
         "created_at": now_text(),
     }
     outbox_path = outbox_dir / f"{safe_name(batch_id)}-thread-send.json"
@@ -288,7 +302,7 @@ def drain_pending(
         "drain_reason": reason,
         "created_at": now_text(),
     }
-    append_jsonl(log_path, batch)
+    append_jsonl(transport_log_path, batch)
     return {"status": "ready_to_send", "batch": batch}
 
 
@@ -302,7 +316,8 @@ def write_state(state_path: Path, row: dict[str, Any]) -> None:
 def run_once(project_root: Path, poll_interval_seconds: int, orchestrator_thread_id: str) -> dict[str, Any]:
     agent_lanes = project_root / "agent-lanes"
     inbox_root = agent_lanes / "callback-inbox"
-    log_path = agent_lanes / "message-log.jsonl"
+    business_log_path = agent_lanes / "message-log.jsonl"
+    transport_log_path = agent_lanes / "transport-log.jsonl"
     state_path = inbox_root / "post-office-state.json"
     pid_path = inbox_root / "post-office.pid"
 
@@ -311,12 +326,19 @@ def run_once(project_root: Path, poll_interval_seconds: int, orchestrator_thread
     (inbox_root / "delivered").mkdir(parents=True, exist_ok=True)
     pid_path.write_text(str(os.getpid()), encoding="utf-8")
 
-    rows = read_jsonl(log_path)
+    rows = read_jsonl(business_log_path) + read_jsonl(transport_log_path)
     idle, reason = state_is_idle(latest_orchestrator_state(rows))
     pending_count = len(collect_pending(inbox_root))
     if pending_count:
         drain_reason = reason if idle else f"direct_prompt_required_despite_{reason}"
-        result = drain_pending(project_root, inbox_root, log_path, drain_reason, orchestrator_thread_id)
+        result = drain_pending(
+            project_root,
+            inbox_root,
+            business_log_path,
+            transport_log_path,
+            drain_reason,
+            orchestrator_thread_id,
+        )
         write_state(
             state_path,
             {

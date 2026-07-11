@@ -1,0 +1,34 @@
+{
+  "schema_version": "agent-lanes.value-slice.v2",
+  "value_slice_id": "VS-YYYYMMDD-001",
+  "title": "一句话描述纵向用户价值切片",
+  "status": "PROPOSED",
+  "user_outcome": "用户完成本切片后，能够获得什么以前不能完成的结果。",
+  "new_user_action": "用户新增或恢复的一个可观察动作。",
+  "expected_value_delta": "new_user_action | blocker_removed | quality_confidence | risk_reduction",
+  "active_user_loop": "项目北极星用户闭环",
+  "loop_start": "本切片从哪一步开始",
+  "loop_end": "本切片推进到哪一步结束",
+  "stage_priority": "P1",
+  "mainline_impact": "direct_advance",
+  "risk_level": "medium_risk",
+  "slice_kind": "vertical_product_slice",
+  "primary_surface": "唯一完整承载本能力的一级页面或 CLI/API 入口",
+  "supporting_surfaces": [
+    {
+      "surface": "其它入口",
+      "mode": "link_or_summary"
+    }
+  ],
+  "blocking_concern_id": null,
+  "scope_in": [],
+  "scope_out": [],
+  "acceptance_criteria": [],
+  "review_policy": "bundle_boundary",
+  "callback_budget": 3,
+  "completion_gate_required": true,
+  "next_step_policy": "advisory_only",
+  "capability_registry_change": false,
+  "registry_target": "docs/product-feature-status.json",
+  "language_rule": "项目文档中文优先"
+}

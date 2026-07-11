@@ -1,6 +1,6 @@
 # Skill 机制审计
 
-本审计用模板内 `.agents/skills/goal-methodology-guide/references/GOAL-methodology-abstract.md` 里的 GOAL 方法论检查本模板包的本地 Skills。
+本审计用 `D:/1-Projects/TextBrain/GOAL-methodology-abstract.md` 里的 GOAL 方法论检查本模板包的本地 Skills。
 
 ## 检查标准
 
@@ -65,11 +65,64 @@ powershell -ExecutionPolicy Bypass -File scripts/check-skill-mechanism.ps1
 
 具体项目复制本包后，还应根据技术栈继续把 `.codex/gates/` 中的门禁扩展成真实构建、测试、类型检查、浏览器验收或发布检查。
 
+## 2026-07-05 Figma / 前端设计审查补充
+
+触发原因：用户指出复杂工作台页面虽然字段、证据和边界齐全，但首屏没有明确任务焦点，行动路径没有串成线，审计字段和 raw enum 泄露到主阅读层，导致页面像日志罗列。外部 Figma 设计审查视角能更早发现这些严重 IA / UX 问题。
+
+机制补齐：
+
+- `frontend-quality-runner` 必须吸收 Figma 设计审查视角，不再只做截图、可读性和字段检查。
+- `design-brief-builder` 在复杂工具型前端设计中必须写清首屏任务、下一步行动、返回路径、主层/详情层/审计层分工。
+- `skill-hooks.md` 应把 Figma 审查、首屏没有重点、行动路径不清、审计信息太多、像日志罗列等表达路由到前端质量检查。
+- `skill-mechanism-check.ps1` 增加门禁，检查前端质量 Skill 是否覆盖 Figma 审查、首屏任务、行动路径、主次分层、状态语义和窄屏可用。
+
+通用原则：Figma 不是产品结构源头，但它的设计审查视角必须成为复杂前端进入开发/验收前的质量门槛。字段齐全不等于设计合格；用户能看懂当前任务和下一步，才算前端主线可用。
+
+## 2026-07-06 Decision-Usefulness Gate / 决策意义门槛
+
+触发原因：用户指出某复杂工作台的行动卡片虽然已部分中文化，但仍像机器流程和审计字段罗列。卡片没有告诉用户当前结论、对核心业务判断的影响、关键证据、否决条件和下一步人工动作，说明现有 Figma/前端质量门槛仍可能把“机器可验字段齐全”误判为“用户可用信息完整”。
+
+机制补齐：
+
+- `frontend-quality-runner` 增加 Decision-Usefulness Gate。涉及研究、候选、复盘、报告或行动卡片时，必须检查当前判断、核心业务判断影响、关键证据、否决/风险条件、下一步人工动作和技术审计折叠。
+- `design-brief-builder` 要求设计 Brief 先声明卡片类型：`decision_card`、`evidence_card`、`workflow_card` 或 `audit_card`。非决策卡片必须说明“不支持核心业务判断，只用于证据复核 / 流程导航 / 技术审计”。
+- `skill-hooks.md` 增加决策卡片、研究卡片、候选卡片、复盘卡片、报告卡片、行动卡片、核心业务判断、当前判断、决策意义、机器字段卡片等触发词。
+- `skill-mechanism-check.ps1` 增加门禁，检查 `frontend-quality-runner` 和 `design-brief-builder` 是否包含决策意义门槛、卡片类型和关键字段链。
+
+通用原则：业务卡片不是审计日志的漂亮外壳。它必须帮助用户判断下一步是否继续、暂停、复核或排除；raw enum、JSON key、source path、validator status、return anchors 和 rerun command 应默认进入折叠层。
+
+## 2026-07-06 Tool-Level IA / Internal Simulation / Open Source Integration Gates
+
+触发原因：用户进一步指出，复杂前端工具地图不能只解释已有卡片和字段，而要从用户目标出发定义一级页面、页面职责、用户问题、结果回看和状态边界。同时，当前阶段的安全边界不能被误写成最终产品定位；产品内部的模拟执行或沙盒执行，也不能被混同为真实外部执行。另一个需求是“能否嫁接别人开发好的前后端”，这需要先处理 license、attribution、依赖和 adapter 边界，而不是直接复制外部项目。
+
+机制补齐：
+- `frontend-quality-runner` 增加 Tool-Level IA Gate。涉及工具地图、跨页面工作台、验证实验、模拟执行、结果看板或复杂后台时，必须检查一级页面、页面职责、用户路径、入口、结果回看、状态边界和字段如何支撑功能。
+- `frontend-quality-runner` 和 `design-brief-builder` 增加 Internal Simulation Semantics Gate。模板用通用语义表达为“内部模拟执行 / 沙盒执行 / 非真实外部执行”：要区分当前本地样本或静态 payload、产品内部受控状态变化、以及需要账号、secret、付费、远程写入或受监管操作的高风险真实执行。
+- `open-source-research-runner` 增加 Open Source Integration Gate。对外部前端、后端或开源模块的复用，必须先形成 license、attribution、dependency、local smoke、adapter、guardian 边界结论；不得直接复制外部代码进业务目录。
+- `skill-hooks.md` 增加工具地图、一级页面、页面职责、用户路径、验证工作台、内部模拟执行、结果曲线、开源前后端嫁接等触发词。
+- `skill-mechanism-check.ps1` 增加门禁，检查上述三类机制是否存在于对应 Skill、hook 和项目规则中。
+
+通用原则：工具型前端先做“产品结构”再做“字段呈现”。阶段性只读样本、非生产文案和安全声明是当前约束，不应自动变成目标态。开源嫁接先研究和隔离，再适配和验证，不能让外部实现绕开项目自己的架构、守门和证据体系。
+
+## 2026-07-08 Human-Readable Frontend Gate / 人类可读前端门槛
+
+触发原因：用户指出当前前端仍大量出现偏程序代码、偏审计日志、普通人不易读的信息，同时用户可见前端应默认中文优先。已有 Figma / Decision-Usefulness / Tool-Level IA 规则仍可能允许 raw enum、JSON key、内部状态名、路径、命令、ID 或 validator 字段泄露到主阅读层。
+
+已固化规则：
+
+- `frontend-quality-runner` 必须执行 Human-Readable Frontend Gate。所有用户可见主阅读层默认中文优先，技术字段只允许进入折叠详情、审计抽屉、开发者诊断或报告来源层。
+- `design-brief-builder` 必须在设计 Brief 中说明哪些信息用中文人话放在主层，哪些技术信息被折叠；不能让开发直接把字段名当 UI 结构。
+- `review-runner` 验收用户可见前端时必须检查中文优先和技术字段外露；若主阅读层像代码、日志或审计表，不能声明前端可用。
+- `skill-hooks.md` 增加中文优先、人类可读、程序代码信息、机器字段、技术字段外露等触发词。
+- `skill-mechanism-check.ps1` 增加门禁，检查设计、前端质量和验收 Skill 是否覆盖 Human-Readable Frontend Gate。
+
+通用原则：前端不是给 validator 或开发者看的 JSON 浏览器。主层要让用户直接看懂状态、判断、证据、风险和下一步；技术字段保留可追溯，但必须降级到审计/诊断层。
+
 ## 2026-06-16 复查记录
 
 复查依据：
 
-- `.agents/skills/goal-methodology-guide/references/GOAL-methodology-abstract.md`
+- `D:/1-Projects/TextBrain/GOAL-methodology-abstract.md`
 - `.agents/skills/*/SKILL.md`
 - `scripts/check-framework.ps1`
 - `scripts/validate-skills.ps1`
@@ -202,47 +255,19 @@ powershell -ExecutionPolicy Bypass -File scripts/check-skill-mechanism.ps1
 | 模板包必需文件 | 通过 | `check-framework.ps1` 显示 31 个必需文件存在。 |
 | Skill 格式合法性 | 通过 | `validate-skills.ps1` 显示 12 个本地 Skill 全部 valid。 |
 | GOAL 机制覆盖 | 通过 | `check-skill-mechanism.ps1` 显示 12 个 Skill 全部 PASS，并已包含自然语言 hook 检查。 |
+# 2026-07-10 Dynamic Boundary Gate / 动态边界闸门
 
-## 2026-06-23 单能力聚焦预算补充
+## 背景
 
-用户纠正：
+用户指出：旧机制里大量“本轮没有触碰 provider/live API、secret、scheduler、writeback、生产 feed、真实外部执行、quality_reviewed / production_ready”的边界声明，容易被主调度、开发和验收泳道误读成永久禁止，导致本来可以在授权后快速推进的真实接入、质量复核或生产准备长期被挡住。
 
-GOAL Skill 体系在真实执行时可能围绕单个 API、provider 或 capability 连续深挖，追加 wrapper、readiness、operator decision、readonly surface、handoff proposal、apply readiness 等壳层，导致整体产品纵向闭环推进不足。
+## 本次规则
 
-修复原则：
+- 边界是闸门，不是墙：高风险能力未授权时不越权、不伪装完成；已授权时必须按授权范围进入受控实现、smoke、样本保存、质量复核或生产准备。
+- completion callback、review report 和 dashboard 必须区分 `本轮未推进`、`待授权`、`已授权待验证`、`已受控验证/可进入下一成熟度`。
+- 守门泳道负责把风险变成可执行条件，包括授权范围、预算/次数、固定输入、secret 不落盘、允许写入位置、回滚方式和证据路径；不是把能力永久关在门外。
+- `skill-mechanism-check.ps1` 已增加动态边界检查，防止 `AGENTS.md`、主调度、开发、验收、门禁和 hook 路由缺失该规则。
 
-- 单个 provider/capability 连续推进 2-3 个 GOAL 后，`project-orchestrator` 必须做 Capability Exit Check。
-- Exit Check 必须判断成熟度、真实样本或真实 smoke、下游消费、剩余人工决策/授权/预算/真实写入/质量审查，以及是否仍是下一条用户可见流程的直接硬阻塞。
-- 如果当前阶段已经够用，停止继续围绕该 capability 加壳，把剩余优化放入 backlog 或显式授权队列。
-- 下一步切回前端可操作入口、前后端联调、端到端样本、核心业务流程、报告、打包、发布或另一个关键能力。
+## 迁移提示
 
-已补齐：
-
-- 更新 `AGENTS.md` 的项目级规则。
-- 更新 `.agents/skills/project-orchestrator/SKILL.md` 的调度规则和触发词。
-- 更新 `.agents/skills/dev-builder/SKILL.md` 的执行规则和打回条件。
-- 更新 `.codex/hooks/skill-hooks.md` 的自然语言路由。
-- 更新 `.codex/gates/skill-mechanism-check.ps1`，检查 Capability Exit Check 关键规则。
-
-## 2026-06-23 多泳道协作瘦身补充
-
-用户判断：
-
-原 GOAL Skills 为单 Agent 自主运行设计，部分规则偏固定串行：先 GOAL、再计划、再开发、再门禁、再完整审查。启用多泳道后，这些步骤可以由主调度结构化派发、泳道并行产物、completion callback、聚焦门禁和阶段边界合并验收替代，避免效率浪费。
-
-修复原则：
-
-- Skill 是职责契约，不是固定流水线。
-- 主调度可以并行派发规划、设计、守门等互不阻塞的泳道任务。
-- 结构化泳道任务可替代低风险场景下的正式 `goal-creator`。
-- `dev-planner` 只在跨泳道依赖、阶段顺序、联调路线、风险或回滚不清时使用。
-- `review-runner` 默认审查主调度聚合后的证据包，不逐条完整审查低风险 callback。
-- `gate-runner` 按泳道变更面运行聚焦门禁，不因多泳道存在自动全量门禁。
-
-已补齐：
-
-- 更新 `AGENTS.md` 的“多泳道协作下的 Skill 瘦身”规则。
-- 更新 `.agents/skills/project-orchestrator/SKILL.md` 的多泳道协作模式。
-- 更新 `.agents/skills/goal-creator/SKILL.md` 和 `.agents/skills/dev-planner/SKILL.md` 的按需使用边界。
-- 更新 `.agents/skills/review-runner/SKILL.md` 和 `.agents/skills/gate-runner/SKILL.md` 的聚合/聚焦策略。
-- 更新 `.agents/skills/goal-methodology-guide/references/usage-playbook.md`、`.codex/hooks/skill-hooks.md` 和 `.codex/gates/skill-mechanism-check.ps1`。
+历史 message-log、worklog 和审计报告里的“本轮未触碰高风险能力”不需要重写。它们是历史事实。需要修正的是未来任务派发和验收语言：不得把阶段限制写成最终产品定位，不得因为 `DONE_WITH_CONCERNS` 中的非阻塞边界声明让主线停住。

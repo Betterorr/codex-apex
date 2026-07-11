@@ -210,6 +210,8 @@ mock、stub、pytest monkeypatch 只能证明代码路径，不能推进 provide
 
 普通“继续/下一步”默认使用轻量继续模式；当用户反馈与状态文档不一致、registry 证据过期、阶段边界、高风险、发布/交付或判断不清时，升级完整复盘。
 
+Agent Lanes V2.3 的自动推进采用四个唯一机器事实源：`current-state.json`、`value-slice-ledger.jsonl`、`Product Value Gate` 和 `Value Delta Gate`。默认最多连续 2 个 Value Slice，完成必须证明 before/after、至少两个验收结果和新鲜 evidence；外部副作用必须由 Product Gate 内部的精确 capability/variant authorization resolver 解析。达到两切片、路线冲突、高风险、授权不清、成熟度晋级、远程写入或高风险真实执行时停在用户检查点。重大机制升级后应先积累真实运行记录，再由未参与实现的 Agent 独立复审。
+
 同一纵向能力包内，小修默认只跑聚焦门禁；但累计 3-5 个小修后，或准备声明用户可用、客户可用、生产可用前，必须做一次合并审查。
 
 ## 6. 自进化什么时候调用

@@ -1,6 +1,183 @@
 # Agent Lanes + GOAL 模板版本升级说明
 
 本文件是模板包对外发布时的版本说明入口。每次重新打包发布前，都要在这里追加一条版本记录，说明本次升级解决了什么问题、包含哪些新材料、迁移到其他项目时需要注意什么。
+
+## 2026-07-11 / 20260711-domain-neutral-real-run-reaudit
+
+### 变更摘要
+
+- 清除模板中的源项目产品链路、页面名、`MD-*` ID、金融领域默认值和示例路径，改为由目标项目定义 `north_star`、`active_user_loop`、验证工作台和内部模拟执行语义。
+- 保留 Value Slice、Stage Value Gate、Anti-Shell Gate、最多两刀检查点和动态授权闸门，但不绑定任何行业。
+- Product Value Gate 新增人类可读字段乱码检查（包括 `???`），并拒绝把 `product_value_gate`、`dispatch_hash`、`callback_provenance` 回填到 immutable dispatch 合同。
+- 首次启用或重大机制升级后，先运行 1-2 个低/中风险真实产品切片；积累完整控制面记录后，由未参与实现的 Agent 独立复审，复审前不得开启长期无人值守。
+- 新增发布构建脚本，对项目专属词、`???`/replacement character 乱码、嵌套同名 Skill 副本、必需文件和 zip 内容做 fail-closed 检查。
+
+### 迁移提示
+
+目标项目部署后先填写自己的产品骨架、P1/P2 主线和用户闭环。不要复制源项目的业务页面或 ID。旧模板包保留为历史；新部署优先使用本版本生成的 zip 和 manifest。
+
+## 2026-07-11 / 20260711-trusted-control-transaction-v2-3
+
+### 变更摘要
+
+- 不同 Value Slice 的 dispatch 统一竞争全局 active reservation；auto iteration 已完成刀数和 active reservation 在同一 ledger 锁内核对。
+- dispatch event 保存完整合同 hash，identity 重用只有关键字段/hash 完全一致才允许幂等。
+- Product Gate 内部调用 authorization resolver；禁止信任 dispatch 自报 `AUTHORIZED`。
+- 新增 `control_provenance.py`，为 evidence receipt 和 callback claim 签名；Value Delta/邮局同时检查签名、ledger provenance、thread/lane 和 dispatch hash。
+- 历史 V2.1/V2.2 弱 dispatch event 不得支撑新 V2.3 completion。
+- integrated 与 working-copy 两套部署路径均复制 V2.3 核心脚本并初始化本地 provenance key。
+
+### 迁移提示
+
+部署后不要复制其它项目的 `.codex/runtime/agent-lanes-control.key`；每个项目独立生成。旧 ledger 保留审计，但新 completion 必须来自新 V2.3 dispatch。该签名边界面向协作式本地自动化，不代表同用户恶意进程隔离。
+
+## 2026-07-11 / 20260711-control-kernel-hardening-v2-2
+
+### 变更摘要
+
+- 强制 dispatch envelope 使用 `dispatch_mode=manual|auto`；正式派发必须 `--record-dispatch`，候选验证显式 `--dry-run`。
+- Product Value Gate 拒绝冲突 active slice，并对手动/自动 external effects 统一要求授权解析结果。
+- Value Delta Gate 强制 dispatch file、ledger `dispatch_started` 和 `evidence_receipt.py` receipt；陈旧时间、自报 command、非零退出或 artifact hash/mtime 漂移均 fail closed。
+- callback 按注册泳道、目标主调度、dispatch target、`reply_to` 和 `value_slice_id` 做语义校验；接受后写入 callback budget。
+- Value Slice ledger 增加跨进程锁、原子预算预留及同一 dispatch 单 callback 限制；dashboard 改用精确匹配并显示控制面冲突。
+
+### 迁移提示
+
+旧 append-only 日志无需批量回写；从新派发开始补 `dispatch_mode` 并使用新 Product/Value Delta Gate。部署脚本会复制 `evidence_receipt.py`。迁移后运行五个脚本自测、机制门禁和一次负向集成 smoke；在独立复审前保留人工检查点。
+
+## 2026-07-11 / 20260711-observability-evidence-integrity
+
+### 变更摘要
+
+- 回报邮局新增 callback 身份与回复链 fail-closed 校验，避免“未知泳道”和不可追踪回报。
+- dashboard 从 `current-state.active_value_slice` 补齐尚未进入 message-log 的 active dispatch，避免待回计数与当前状态冲突。
+- Value Delta Gate 新增带时区 ISO-8601、未来时间、完成/证据时间顺序和 dispatch-to-completion id 校验。
+- Product Value Gate 支持 `outbound_message_id`，ledger 记录与真实发出消息保持一致。
+- 同步项目 Skill、机制门禁、模板脚本和部署后自测。
+
+### 迁移提示
+
+部署后运行 `deliver_callback.py --self-test`、`product_value_gate.py --self-test`、`value_delta_gate.py --self-test` 和 `render_dashboard.py`。新 callback 必须显式提供 `from_agent`、`to_agent`、`reply_to` 和 `value_slice_id`；历史 append-only 日志无需批量改写。
+
+## 2026-07-11 / 20260711-bounded-autopilot-control-plane
+
+### 变更摘要
+
+- 新增 `value-slice-ledger.jsonl` 和 `value_slice_ledger.py`，把正式泳道交互与主调度直接执行统一计入预算，关闭只查 message-log 的绕过路径。
+- 新增完成后的 `Value Delta Gate`：必须证明 before/after、至少两个验收结果和新鲜 evidence，只有 PASS 才能累计自动切片。
+- 新增精确 capability/variant 授权解析器；pending、blocked、额度不足或缺授权依据时 fail closed。
+- 受控自动推进默认最多连续 2 个 Value Slice，然后进入用户检查点；高风险、路线冲突、成熟度晋级、远程写入和高风险真实执行提前停止。
+- dashboard 把早于当前状态且 pending=0 的 READY outbox 标记为历史未确认投递，不再诱导业务重做。
+
+### 迁移提示
+
+同步三个新脚本、完成模板、current-state automation policy 和 ledger；旧项目可把已确认的直接执行补录为 `direct_execution_completed`。启用自动推进前必须由用户给出本次迭代授权，并在 `current-state.json` 写明 `auto_iteration_id`、两切片上限和停止条件。
+
+## 2026-07-11 / 20260711-agent-lanes-v2-value-slice-gate
+
+### 变更摘要
+
+- 用 `Value Slice + Product Value Gate` 替代 callback 建议驱动的微任务自动续航；没有真实用户动作、阻塞解除、可信度增量或风险降低的 consumer/handoff/readiness 默认拒绝。
+- callback 预算最多 3 次，下一泳道建议改为 `advisory_only`；低/中风险本地切片在功能包或阶段边界合并审查。
+- `message-log.jsonl` 保留业务记录，`transport-log.jsonl` 承载 spooling、batching 和 orchestrator state；`dashboard.md` 改为紧凑当前状态，完整历史输出到 `dashboard-full.md`。
+- 新增 `product-feature-status.json` 模板，把用户页面、动作和 workflow 与 provider/system capability 成熟度分开。
+
+### 迁移提示
+
+旧项目不删除历史日志和大文档。部署新模板后创建 `current-state.json`、`transport-log.jsonl` 和 `product-feature-status.json`，运行 `product_value_gate.py --self-test`，再用一个 Value Slice 派发做 smoke。旧 consumer capability 可只读保留并逐步迁移，不再新增同类条目。
+
+## 2026-07-10 / 20260710-post-office-readable-retry-status
+
+### 变更摘要
+
+- 修复回报邮局最后一公里：`orchestrator-message.md` 和 outbox `*-thread-send.json` 作为人类可读投递产物，必须用能被 Windows/PowerShell/桌面预览稳定识别中文的方式写入。
+- `deliver_callback.py` 输出保留 `target_thread_id`、`thread_prompt`、`outbox_path` 和待重试语义；如果 `send_message_to_thread` 返回 `no active turn to steer` 或目标线程不可用，不要求泳道重做业务任务，只保留 outbox 等待重试。
+- `render_dashboard.py` 顶部新增邮局投递状态摘要，显示最新 outbox 是已生成待发送 / 待重试，还是已发送 / 已处理，并给出合并信和 outbox 链接。
+- `skill-mechanism-check.ps1` 增加邮局可读编码、outbox 重试状态、deliver 重试提示和 dashboard 最新 outbox 状态检查，避免模板迁移后回退。
+- 同步 GOAL base、本地机制 Skill、hook/gate 和模板脚本；不重写历史乱码审计正文，历史 `message-log.jsonl` 继续作为审计事实保留。
+
+### 迁移提示
+
+已部署旧模板的项目建议同步 `agent-lanes/scripts/callback_post_office.py`、`agent-lanes/scripts/deliver_callback.py`、`agent-lanes/scripts/render_dashboard.py`、`AGENTS.md`、`.agents/skills/project-orchestrator`、`.agents/skills/evolution-runner` 和 `.codex/gates/skill-mechanism-check.ps1`。
+
+迁移后用一个最小 callback dry-run 生成 outbox，直接用 PowerShell `Get-Content` 打开新生成的 `orchestrator-message.md` 和 `*-thread-send.json`，确认中文可读；再运行 `python agent-lanes\scripts\render_dashboard.py`，确认 dashboard 顶部能看到最新邮局投递状态。
+
+## 2026-07-10 / 20260710-dynamic-boundary-gate
+
+### 变更摘要
+
+- 新增 `Dynamic Boundary Gate / 动态边界闸门`：模板不再把 `quality_reviewed`、`production_ready`、provider/live API、secret、scheduler、writeback、production feed、受监管操作、高风险自动化执行或真实外部状态变化写成永久禁区。
+- 更新 `AGENTS.md`、`project-orchestrator`、`dev-builder`、`review-runner`、`gate-runner` 和 `evolution-runner`：未授权时不越权、不伪装完成；已有一次性授权或 standing authorization 时，必须记录授权范围并进入受控实现、smoke、样本保存、质量复核或生产准备。
+- 更新 hook 路由：当用户说“边界写死了”“授权后还被挡住”“真实接入被机制拦住”时，自动路由到进化/守门/门禁，而不是继续按旧边界停住。
+- 更新 `skill-mechanism-check.ps1`：检查模板和项目本地 Skill 是否包含动态边界闸门，防止未来又退回“不要触碰”的死边界表达。
+- 更新 Bootstrap 和泳道模板：守门泳道被定义为“把高风险能力转成可授权、可验证、可回滚路径”的泳道，而不是永久阻断真实接入的泳道。
+
+### 迁移提示
+
+已部署旧模板的项目建议同步本版本中的 `AGENTS.md`、`.agents/skills/project-orchestrator`、`.agents/skills/dev-builder`、`.agents/skills/review-runner`、`.agents/skills/gate-runner`、`.agents/skills/evolution-runner`、`.codex/hooks/skill-hooks.md` 和 `.codex/gates/skill-mechanism-check.ps1`。
+
+迁移后，历史 worklog、message-log 和审计记录中保留的“本轮未触碰高风险能力”不需要重写；它们是历史事实。需要改变的是未来派发、验收和 dashboard 文案：必须区分 `本轮未推进`、`待授权`、`已授权待验证`、`已受控验证/可进入下一成熟度`，不能把阶段边界写成最终产品定位。
+
+## 2026-07-06 / 20260706-tool-level-ia-virtual-portfolio-open-source-gates
+
+### 变更摘要
+
+- 新增 `Tool-Level IA Gate / 工具级信息架构门槛`：复杂工具型前端不能只描述已有卡片、字段和审计状态，必须从用户目标出发定义一级页面、页面职责、用户问题、卡片职责、字段用途、入口、结果回看和状态边界。
+- 新增 `Internal Simulation Semantics Gate / 内部模拟执行语义门槛`：把“当前阶段的本地样本 / 静态 payload / 非生产边界”和“目标态的产品内模拟执行能力”分开表达，避免把阶段性 readonly 文案误写成最终产品定位。
+- 新增 `Open Source Integration Gate / 开源嫁接门槛`：当用户希望复用别人开发好的前端、后端或开源模块时，必须先检查 license、attribution、dependency、local smoke、adapter 边界和 guardian 边界；不能直接复制外部项目代码，也不能绕过高风险守门。
+- 强化 `design-brief-builder` 和 `frontend-quality-runner`：涉及跨页面工作台、工具地图、验证实验、内部模拟执行或结果看板时，设计和验收都要先判断整体工具结构，而不是只审卡片主阅读层。
+- 强化 `open-source-research-runner`：开源调研输出必须落到项目文档、候选池、路线图或泳道 workspace，并明确“可借鉴 / 可适配 / 暂不引入”的边界。
+- 同步更新 hook 路由和 `skill-mechanism-check.ps1`，确保这些规则不只停留在说明文档里。
+
+### 迁移提示
+
+这次升级来自一个复杂工具型前端的真实失败案例，但模板沉淀的是通用机制：任何复杂工具、运营后台、研究台、数据产品或工作台，都需要先定义“用户要完成什么事、一级页面怎么承载、结果在哪里回看、风险和审计信息放在哪一层”。不要把触发案例里的行业对象、业务术语或页面名称照搬到其他项目。
+
+`Internal Simulation Semantics Gate` 是通用的“内部模拟执行 / 沙盒执行 / 非真实外部执行”语义门槛：它要求区分阶段性只读样本、产品内部受控状态变化，以及需要账号/secret/付费/远程写入/受监管操作的高风险真实执行。
+
+如果目标项目要引入开源前后端或第三方示例实现，应先让 `open-source-research-runner` 产出 Open Source Integration Gate 结论，再由 planning / guardian / development 分别处理许可、依赖、adapter 和本地 smoke，不要把外部代码直接复制进业务目录。
+
+## 2026-07-06 / 20260706-decision-usefulness-gate
+
+### 变更摘要
+
+- 新增 `Decision-Usefulness Gate / 决策意义门槛`：复杂业务卡片不能只做到字段齐全、validator 通过和审计可追溯，主阅读层必须让用户看懂当前判断、对核心业务判断的影响、关键证据、否决/风险条件和下一步人工动作。
+- `frontend-quality-runner` 增加卡片类型和打回条件：`decision_card`、`evidence_card`、`workflow_card`、`audit_card`。非决策卡片必须在主视图说明它不支持业务判断，只用于证据复核、流程导航或技术审计。
+- `design-brief-builder` 增加设计前置要求：涉及研究、候选、复盘、报告、行动等决策辅助卡片时，设计 Brief 必须先定义卡片类型和决策意义，不能从 raw enum、JSON key、source path、target surface 或审计字段反推 UI。
+- Hook 路由新增“决策卡片、研究卡片、候选卡片、复盘卡片、报告卡片、行动卡片、核心业务判断、当前判断、决策意义、机器字段卡片”等触发词。
+- 机制门禁新增检查项，确保模板迁移后不会退回“机器字段卡片通过、用户仍无法判断下一步”的旧模式。
+
+### 迁移提示
+
+迁移到其他项目时，目标项目应把“核心业务判断”替换为自己的真实判断场景，例如是否进入审批、是否继续处理、是否升级风险、是否联系客户、是否发布、是否进入下一阶段。通用要求是：业务卡片的主层必须支持用户形成下一步判断；技术审计、追溯路径和 validator 状态默认进入折叠层。
+
+## 2026-07-05 / 20260705-figma-frontend-quality-gate
+
+### 变更摘要
+
+- 将 Figma / 专业设计审查视角纳入复杂工具型前端的默认质量门槛。
+- `frontend-quality-runner` 不再只检查截图、字段完整性和可读性；必须检查首屏任务、行动路径、主次分层、审计信息折叠、状态语义、人话文案、窄屏可用和风险提示。
+- `design-brief-builder` 必须在复杂业务工作台页面中写清用户先看什么、下一步点哪里、完成后回到哪里，以及主层 / 详情层 / 审计层如何分工。
+- Hook 路由新增 Figma 审查、设计审查、首屏没有重点、行动路径不清、审计信息太多、像日志罗列等触发词。
+- 机制门禁新增前端设计审查检查项，防止模板迁移后退回“字段齐全但用户看不懂”的旧模式。
+
+### 迁移提示
+
+迁移到其他项目时，应把这里的规则理解为通用“业务工作台 / 数据工具 / 运营后台 / 研究台”前端质量门槛，而不是某个具体行业的 UI 规则。Figma 不是产品结构源头，但它的审查视角必须进入开发前和验收前：字段、证据和边界齐全，只能说明机器可验；用户能看懂当前任务、风险和下一步，才说明前端设计合格。
+
+## 2026-07-03 / 20260703-registry-orchestrator-thread-resolution
+
+### 变更摘要
+
+- 修复邮局 / callback 投递脚本的旧主调度线程残留问题：`deliver_callback.py` 和 `callback_post_office.py` 默认不再使用硬编码线程 id，而是优先读取 `agent-lanes/agent-registry.json` 中当前 `orchestrator.thread_id`。
+- 当用户通过 lane recovery 替换主调度线程后，后续泳道 completion callback 会自动投递到当前主调度，而不是投到历史归档线程。
+- 保留显式 `--orchestrator-thread-id` 覆盖能力；若 registry 缺失，则退到 `AGENT_LANES_ORCHESTRATOR_THREAD_ID`，最后才是 `pending_setup`。
+
+### 迁移提示
+
+已部署旧模板的项目如果发生过主调度线程重建，必须同步本版本的 `deliver_callback.py` 和 `callback_post_office.py`。否则泳道可能已经完成并写入审计日志，但合并回报会投到旧线程，表现为“主调度等待开发回报”。
+
+
 ## 2026-07-03 / 20260703-loop-empty-array-warning-fix
 
 ### 变更摘要
@@ -34,7 +211,7 @@
 ### 变更摘要
 
 - 继续净化对外模板文案，把守门边界中的原行业化风险词替换为更通用的“受监管操作 / 高风险自动化执行”。
-- 保留原本的风险语义：凡涉及真实调用、账号、secret、成本、外部写入、受监管操作或高风险自动化执行，仍必须先进守门泳道。
+- 保留原本的风险语义：凡涉及真实调用、账号、secret、成本、外部写入、受监管操作或高风险自动化执行，仍必须通过守门/授权路径；从 `20260710-dynamic-boundary-gate` 起，该路径被定义为动态授权闸门，不是永久阻断。
 - 本次只改模板和 GOAL base 的可移植说明，不改变源项目自己的业务规则和运行态约束。
 
 ### 迁移提示
@@ -186,3 +363,23 @@
 
 - 形成第一版可移植 Agent Lanes + GOAL 集成模板包。
 - 提供基础部署提示词、运行态模板、邮局回报机制、dashboard 刷新脚本和 GOAL base。
+# Agent Lanes GOAL Integrated Template Version History
+
+## 2026-07-04 / 20260704-dashboard-utf8-readable-ledger-fix
+
+### 本次升级重点
+
+- 修复模板内 `scripts/render_dashboard.py` 的 UTF-8 中文渲染链路，避免 dashboard 标题、泳道名、状态说明、建议动作和近期产物摘要被写成 mojibake。
+- 保留 `communications-readable.xlsx` 作为主要人读账本，中文表头、冻结首行、筛选、列宽、自动换行和质量状态着色保持启用。
+- 增强乱码隔离：dashboard 主视图不展示 `????` 或 mojibake 原文；乱码记录只在质量/审计区展示编号、来源和处理方式，并提示需要重发 UTF-8 callback。
+- 同步运行态、working-copy 和可移植模板脚本，防止后续打包或迁移新项目时重新带入坏渲染器。
+
+### 迁移提示
+
+已部署旧模板的项目只需要替换 `agent-lanes/scripts/render_dashboard.py`，然后运行：
+
+```powershell
+python agent-lanes\scripts\render_dashboard.py
+```
+
+如果历史 `message-log.jsonl` 已经包含乱码记录，不建议重写历史审计；让 dashboard 隔离污染即可。只有仍需业务语义的记录，才要求对应泳道重新投递 UTF-8 callback。

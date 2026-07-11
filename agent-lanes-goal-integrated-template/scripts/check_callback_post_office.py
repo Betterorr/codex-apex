@@ -34,6 +34,7 @@ NON_ORCHESTRATOR = {
 COMPLETION_STATUSES = {"DONE", "DONE_WITH_CONCERNS", "NEEDS_CONTEXT", "BLOCKED"}
 DIRECT_OK_MODES = {"direct_thread_prompt_ready"}
 STRANDED_DELIVERY_MODES = {"spooled", "batched_log"}
+TRANSPORT_TASK_TYPES = {"callback_batch_ready", "callback_spooled", "orchestrator_state"}
 
 
 def parse_time(value: str | None) -> datetime | None:
@@ -175,6 +176,7 @@ def main() -> int:
     project_root = Path(args.project_root).resolve()
     agent_lanes = project_root / "agent-lanes"
     log_path = agent_lanes / "message-log.jsonl"
+    transport_log_path = agent_lanes / "transport-log.jsonl"
     pending_dir = agent_lanes / "callback-inbox" / "pending"
     state_path = agent_lanes / "callback-inbox" / "post-office-state.json"
     policy_path = agent_lanes / "callback-inbox" / "post-office-policy.json"
@@ -209,10 +211,13 @@ def main() -> int:
         legacy_garbled_payload_before = parse_time(policy.get("legacy_garbled_payload_before"))
 
     rows = read_jsonl(log_path)
+    transport_rows = read_jsonl(transport_log_path)
+    all_rows = rows + transport_rows
     scoped_rows = [row for row in rows if include_since(row, since)]
+    scoped_transport_rows = [row for row in transport_rows if include_since(row, since)]
 
     completion_like_rows = [row for row in scoped_rows if is_completion_like(row)]
-    batches = [row for row in rows if row.get("task_type") == "callback_batch_ready"]
+    batches = [row for row in all_rows if row.get("task_type") == "callback_batch_ready"]
     batch_ids: set[str] = set()
     thread_ready_batch_ids: set[str] = set()
     thread_ready_callback_ids: set[str] = set()
@@ -271,7 +276,7 @@ def main() -> int:
         else:
             warnings.append(finding)
 
-    for batch in [row for row in scoped_rows if row.get("task_type") == "callback_batch_ready"]:
+    for batch in [row for row in scoped_rows + scoped_transport_rows if row.get("task_type") == "callback_batch_ready"]:
         message_id = as_text(batch.get("message_id"))
         if message_id in thread_ready_batch_ids:
             continue
@@ -290,7 +295,7 @@ def main() -> int:
                 f"{message_id} delivery_mode={batch.get('delivery_mode') or '-'} status={batch.get('status') or '-'}"
             )
 
-    for row in scoped_rows:
+    for row in scoped_rows + scoped_transport_rows:
         message_id = as_text(row.get("message_id"))
         if not message_id or not has_garbled_payload(row):
             continue
@@ -303,7 +308,7 @@ def main() -> int:
         else:
             warnings.append(finding)
 
-    spooled_rows = [row for row in scoped_rows if row.get("task_type") == "callback_spooled"]
+    spooled_rows = [row for row in scoped_rows + scoped_transport_rows if row.get("task_type") == "callback_spooled"]
     for row in spooled_rows:
         reply_to = as_text(row.get("reply_to"))
         if reply_to and reply_to not in batch_ids:
@@ -324,9 +329,13 @@ def main() -> int:
         if state.get("status") not in {"running", "stopped"}:
             warnings.append(f"unknown post office state: {state.get('status')}")
 
+    if not transport_log_path.exists():
+        errors.append("transport log missing: agent-lanes/transport-log.jsonl")
+
     result = {
         "status": "FAIL" if errors else ("WARN" if warnings else "PASS"),
         "checked_rows": len(scoped_rows),
+        "transport_rows_checked": len(scoped_transport_rows),
         "completion_like_checked": len(completion_like_rows),
         "batches_seen": len(batches),
         "batches_with_orchestrator_message": batch_message_paths,

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
@@ -83,6 +84,7 @@ def build_registry(project_name: str, primary_module: str, orchestrator_thread_i
                     f"agent-lanes/lanes/{lane_id}/worklog.md",
                     f"agent-lanes/lanes/{lane_id}/workspace/",
                     "agent-lanes/message-log.jsonl",
+                    "agent-lanes/transport-log.jsonl",
                 ],
             }
         )
@@ -94,6 +96,7 @@ def build_registry(project_name: str, primary_module: str, orchestrator_thread_i
         "communication": {
             "callback_delivery": "post_office_direct_thread_prompt",
             "audit_log": "agent-lanes/message-log.jsonl",
+            "transport_log": "agent-lanes/transport-log.jsonl",
             "message_log_role": "audit_backup_not_default_inbox",
         },
     }
@@ -139,7 +142,17 @@ def main() -> int:
     copies = [
         ("agent-lanes.template.md", "agent-lanes/agent-lanes.md"),
         ("completion-callback.template.json", "agent-lanes/completion-callback.template.json"),
+        ("value-slice-completion.template.json", "agent-lanes/value-slice-completion.template.json"),
+        ("value-slice.template.json", "agent-lanes/value-slice.template.json"),
+        ("current-state.template.json", "agent-lanes/current-state.json"),
+        ("product-feature-status.template.json", "docs/product-feature-status.json"),
         ("scripts/render_dashboard.py", "agent-lanes/scripts/render_dashboard.py"),
+        ("scripts/product_value_gate.py", "agent-lanes/scripts/product_value_gate.py"),
+        ("scripts/value_slice_ledger.py", "agent-lanes/scripts/value_slice_ledger.py"),
+        ("scripts/value_delta_gate.py", "agent-lanes/scripts/value_delta_gate.py"),
+        ("scripts/evidence_receipt.py", "agent-lanes/scripts/evidence_receipt.py"),
+        ("scripts/control_provenance.py", "agent-lanes/scripts/control_provenance.py"),
+        ("scripts/resolve_authorization.py", "agent-lanes/scripts/resolve_authorization.py"),
         ("scripts/deploy_agent_lanes_template.py", "agent-lanes/scripts/deploy_agent_lanes_template.py"),
         ("scripts/deliver_callback.py", "agent-lanes/scripts/deliver_callback.py"),
         ("scripts/callback_post_office.py", "agent-lanes/scripts/callback_post_office.py"),
@@ -148,6 +161,18 @@ def main() -> int:
     ]
     for src_rel, dst_rel in copies:
         copy_if_needed(template / src_rel, target / dst_rel, args.overwrite_runtime, report)
+
+    provenance_key = target / ".codex" / "runtime" / "agent-lanes-control.key"
+    provenance_key.parent.mkdir(parents=True, exist_ok=True)
+    if not provenance_key.exists():
+        provenance_key.write_bytes(os.urandom(32))
+        report.append(f"CREATE local provenance key {provenance_key}")
+    else:
+        report.append(f"KEEP existing local provenance key: {provenance_key}")
+    runtime_gitignore = provenance_key.parent / ".gitignore"
+    if not runtime_gitignore.exists():
+        runtime_gitignore.write_text("*\n!.gitignore\n", encoding="utf-8")
+        report.append(f"CREATE {runtime_gitignore}")
 
     copy_tree_files_if_needed(
         template / "goal-development-base" / ".agents" / "skills",
@@ -193,6 +218,10 @@ def main() -> int:
         write_if_missing(worklog, content, report)
 
     message_log = agent_lanes / "message-log.jsonl"
+    transport_log = agent_lanes / "transport-log.jsonl"
+    value_slice_ledger = agent_lanes / "value-slice-ledger.jsonl"
+    write_if_missing(transport_log, "", report)
+    write_if_missing(value_slice_ledger, "", report)
     message_log.parent.mkdir(parents=True, exist_ok=True)
     bootstrap_event = {
         "message_id": f"bootstrap-{datetime.now().strftime('%Y%m%d-%H%M%S')}",
@@ -218,12 +247,15 @@ def main() -> int:
         f"- Created at: `{iso_now()}`\n"
         f"- Registry: `agent-lanes/agent-registry.json`\n"
         f"- Message log: `agent-lanes/message-log.jsonl`\n"
+        f"- Transport log: `agent-lanes/transport-log.jsonl`\n"
+        f"- Value slice ledger: `agent-lanes/value-slice-ledger.jsonl`\n"
         f"- Install report: `agent-lanes/INSTALL-REPORT.md`\n\n"
         f"## Lanes\n\n"
         + "\n".join(f"- `{lane_id}`: {display_name}" for lane_id, display_name in LANES)
         + "\n\n"
         f"## Next Step\n\n"
-        f"Run `python agent-lanes/scripts/render_dashboard.py` after the first lane messages or completion callbacks are recorded.\n",
+        f"Define the first low-risk Value Slice, run `agent-lanes/scripts/product_value_gate.py`, "
+        f"then dispatch lane work through the callback post office.\n",
         report,
     )
 
@@ -233,6 +265,9 @@ def main() -> int:
         "# Agent Lanes 规则片段\n\n"
         "- 非主调度泳道完成后调用 `agent-lanes/scripts/deliver_callback.py`。\n"
         "- `message-log.jsonl` 只作为审计备份，不是主调度默认收件箱。\n"
+        "- `transport-log.jsonl` 只记录 spooling、batching 和 orchestrator state。\n"
+        "- 新派发必须绑定 Value Slice，并先通过 `product_value_gate.py`。\n"
+        "- `recommended_next_*` 只作咨询，不能自动触发派发。\n"
         "- `deliver_callback.py` 输出 `send_required=true` 时，只发送返回的 `thread_prompt` 一次。\n"
         "- `deliver_callback.py` 输出 `send_required=false`、`spooled_waiting`，或只生成 `spooled`/`batched_log` 记录时，不算完成回报已送达；必须重跑投递或记录阻塞，不能短 wake。\n"
         "- 主调度收到 `【邮局合并回报】` 后直接处理原文。\n",

@@ -1,0 +1,22 @@
+{
+  "schema_version": "product-feature-status.v1",
+  "updated_at": "YYYY-MM-DD",
+  "purpose": "记录用户可见产品能力；provider、SDK、模型、执行引擎和授权边界继续记录在 capability-status.json。",
+  "registry_policy": {
+    "capability_registry_accepts": [
+      "external_provider",
+      "sdk_or_cli",
+      "model_runtime",
+      "execution_engine",
+      "authorization_boundary"
+    ],
+    "product_feature_registry_accepts": [
+      "user_page",
+      "user_action",
+      "workflow",
+      "reporting_surface"
+    ],
+    "new_consumer_capability_entries_forbidden": true
+  },
+  "features": []
+}

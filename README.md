@@ -1,106 +1,84 @@
 # Codex Apex
 
-Codex Apex is an open template system for running long-lived, multi-lane development workflows inside Codex.
+Codex Apex is a portable Agent Lanes + GOAL template for running long-lived development work inside Codex.
 
-It packages two complementary ideas:
+It helps a project keep coordination, evidence, review, and recovery in files instead of leaving everything inside one chat thread.
 
-- **Agent Lanes**: a coordination protocol for splitting a project across persistent agent lanes such as orchestration, planning, design, development, guardian review, independent review, and evolution.
-- **GOAL Development Base**: a local project operating system for clarifying goals, planning work, implementing changes, validating evidence, reviewing risk, releasing, and evolving the workflow.
+## Latest Version
 
-The current canonical template is:
+Current release: **Agent Lanes GOAL Portable v2.3**
+
+This v2.3 package is a GPT-5.6-assisted upgrade of the previous public template. The main shift is away from getting stuck polishing wrappers, shells, and secondary mechanism details, and toward value-gated product slices:
+
+- `Value Slice` templates for dispatching work around a concrete user-visible slice.
+- `Product Value Gate` and `Value Delta Gate` scripts to keep work tied to product movement.
+- control provenance, authorization resolution, evidence receipts, and a value-slice ledger.
+- `current-state` and `product-feature-status` templates for durable project state.
+- zero-required-placeholder bootstrap: the project name defaults to the current Codex project folder.
+
+Release asset SHA-256:
 
 ```text
-agent-lanes-goal-integrated-template/
+873323E414CAA613A96407E229D339D47FE5C7B9F1DA6B322FC62144C57C5969
 ```
 
-## Start A Project With This Template
+## One-Click Bootstrap Prompt
 
-This repository is meant to be copied into another Codex project. The template folder is not the runtime itself; it is the installer package that tells Codex how to create the runtime files, lane registry, worklogs, callback routing, gates, and GOAL skills inside your own project.
-
-Template folder:
+Copy `agent-lanes-goal-integrated-template/` into your target project, preferably here:
 
 ```text
-agent-lanes-goal-integrated-template/
+<your-project>/docs/agent-lanes-goal-integrated-template/
 ```
 
-Recommended location in your target project:
+Then open Codex in the target project root and paste this prompt:
 
 ```text
-<TARGET_PROJECT_ROOT>/docs/agent-lanes-goal-integrated-template/
-```
+You are working inside Codex in the target project.
 
-### 1. Copy The Template Folder
+Please deploy the Agent Lanes + GOAL development-base template into the current project.
 
-Clone this repository or download it as a ZIP, then copy this folder into your target project:
+Default assumptions:
+- The current Codex working directory is the target project root.
+- The current project folder name is the project name.
+- The template directory is docs/agent-lanes-goal-integrated-template.
+- The primary module can start as ".".
+- The orchestrator thread id can start as "pending_setup".
 
-```text
-agent-lanes-goal-integrated-template/
-```
+First read:
+- docs/agent-lanes-goal-integrated-template/DEPLOY-PROMPT.md
+- docs/agent-lanes-goal-integrated-template/TEMPLATE-MANIFEST.md
+- docs/agent-lanes-goal-integrated-template/README-GOAL-INTEGRATED.md
+- docs/agent-lanes-goal-integrated-template/goal-development-base/AGENTS.md
 
-For example:
-
-```text
-your-project/
-  docs/
-    agent-lanes-goal-integrated-template/
-```
-
-### 2. Paste This Prompt Into Codex
-
-Paste the whole block into Codex while Codex is opened in your target project. If the template is under `docs/agent-lanes-goal-integrated-template/`, there are no required placeholders.
-
-```text
-你现在在 Codex 里工作。请把 Agent Lanes + GOAL 开发基座模板部署到当前项目。
-
-默认假设：
-- 当前 Codex 工作目录就是目标项目根目录。
-- 当前项目文件夹名就是项目名。
-- 模板目录在 docs/agent-lanes-goal-integrated-template。
-- 主要模块目录先使用 .。
-- 主调度线程 id 先使用 pending_setup。
-
-请先读取模板目录里的 DEPLOY-PROMPT.md、TEMPLATE-MANIFEST.md、README-GOAL-INTEGRATED.md 和 goal-development-base/AGENTS.md，理解这个模板会创建什么运行态。
-
-然后优先运行：
+Then run:
 python ".\docs\agent-lanes-goal-integrated-template\scripts\deploy_agent_lanes_template.py"
 
-部署要求：
-- 不要删除文件。
-- 不要覆盖已有业务代码。
-- 如果目标项目已有 AGENTS.md、docs/、scripts/、.agents/ 或 .codex/ 内容，只能保守合并或补齐缺失文件，并把冲突写入 docs/goal-agent-lanes-integration-notes.md。
-- 部署后读取 agent-lanes/INSTALL-REPORT.md。
-- 运行模板自带的可用校验脚本。
-- 最后告诉我已经创建了哪些文件、哪些文件被跳过、有哪些冲突或需要我确认的事项。
+Rules:
+- Do not delete files.
+- Do not overwrite business code.
+- If AGENTS.md, docs/, scripts/, .agents/, or .codex/ already exist, merge conservatively and record conflicts in docs/goal-agent-lanes-integration-notes.md.
+- After deployment, read agent-lanes/INSTALL-REPORT.md.
+- Run the template's validation scripts where available.
+- Tell me which files were created, which were skipped, and what needs confirmation.
 
-部署完成后，请把 agent-lanes/dashboard.md 作为主入口，把 agent-lanes/message-log.jsonl、各 lane 的 worklog.md 和 completion callback 作为追溯记录。
+Use agent-lanes/dashboard.md as the main entry after deployment.
+Use agent-lanes/message-log.jsonl, lane worklogs, completion callbacks, evidence receipts, and value-slice-ledger.jsonl as trace records.
 ```
 
-If you placed the template somewhere else, tell Codex the path and use the optional `--template-dir` argument.
+If you placed the template somewhere else, tell Codex the path and pass `--template-dir`.
 
-The full deployment prompt lives in:
+## What It Creates
 
-```text
-agent-lanes-goal-integrated-template/DEPLOY-PROMPT.md
-```
-
-Recovery and persistence references:
-
-```text
-agent-lanes-goal-integrated-template/PERSISTENT-RUNTIME-FILES.md
-agent-lanes-goal-integrated-template/orchestrator-recovery-template.md
-agent-lanes-goal-integrated-template/goal-development-base/.agents/skills/lane-recovery-runner/SKILL.md
-```
-
-### What Codex Will Create
-
-After deployment, your target project should gain a runtime structure like:
+The deployment script creates a local runtime in the target project:
 
 ```text
 agent-lanes/
   agent-registry.json
   agent-lanes.md
-  message-log.jsonl
   dashboard.md
+  message-log.jsonl
+  transport-log.jsonl
+  value-slice-ledger.jsonl
   callback-inbox/
   lanes/
     orchestrator/
@@ -114,69 +92,27 @@ agent-lanes/
 .agents/skills/
 .codex/hooks/
 .codex/gates/
-docs/
+docs/product-feature-status.json
 ```
 
 ## Why This Exists
 
-Codex is strongest when project context, execution boundaries, evidence, and follow-up routing are explicit. Codex Apex turns those practices into a portable template so a project can keep moving without losing track of:
-
-- who owns each type of work,
-- where decisions and worklogs live,
-- how completion callbacks are delivered,
-- which gates must stop for user confirmation,
-- how review and evolution feed back into the system,
-- how a new orchestrator or lane thread can recover from persistent runtime files when an old thread is too long or fails.
-
-## Quick Start
-
-1. Copy `agent-lanes-goal-integrated-template/` into the target project, preferably under `docs/`.
-2. Open `agent-lanes-goal-integrated-template/DEPLOY-PROMPT.md`.
-3. Paste the minimal prompt into Codex from the target project root.
-4. Review the generated runtime files, especially `agent-lanes/dashboard.md`, `agent-lanes/message-log.jsonl`, and each lane worklog.
-
-For the GOAL-integrated version, start with:
-
-```text
-agent-lanes-goal-integrated-template/README-GOAL-INTEGRATED.md
-agent-lanes-goal-integrated-template/BOOTSTRAP-PROMPT-GOAL-INTEGRATED.md
-```
-
-## Language Versions
-
-The original template content is Chinese-first because it was built for Chinese project operations. This repository uses English as the default public entry point while preserving the Chinese version as the canonical operating text during the first open-source phase.
-
-- English entry: `README.md`
-- Chinese entry: `README.zh-CN.md`
-- Language and release strategy: `docs/i18n-strategy.zh-CN.md`
+Codex is strongest when context, execution boundaries, evidence, callbacks, and review gates are explicit. Codex Apex packages those habits into a reusable template so a project can recover from long chats, hand work across lanes, and keep a durable record of what changed and why.
 
 ## Repository Layout
 
 ```text
 .
-├── README.md
-├── README.zh-CN.md
-├── docs/
-│   ├── i18n-strategy.zh-CN.md
-│   └── release-checklist.zh-CN.md
-└── agent-lanes-goal-integrated-template/
-    ├── README.md
-    ├── README-GOAL-INTEGRATED.md
-    ├── DEPLOY-PROMPT.md
-    ├── TEMPLATE-MANIFEST.md
-    ├── scripts/
-    └── goal-development-base/
+|-- README.md
+|-- README.zh-CN.md
+|-- docs/
+|-- agent-lanes-goal-integrated-template/
+|   |-- DEPLOY-PROMPT.md
+|   |-- TEMPLATE-MANIFEST.md
+|   |-- VERSION-HISTORY.md
+|   |-- scripts/
+|   `-- goal-development-base/
 ```
-
-## Current Status
-
-This repository is in its first open-source packaging pass. The template is usable today as a Chinese-first canonical operating template with English public entry points and a minimal bootstrap prompt.
-
-Latest template package: `20260703-loop-empty-array-warning-fix`.
-
-- Preserves Next Mainline Slice Selection for automatic follow-up slice routing.
-- Fixes Product Loop warnings so empty `blocking_concerns` and `backlog_concerns` arrays mean no concern, not missing fields.
-- Adds `frontend-workflow-planner` and `VERSION-HISTORY.md` to the portable template.
 
 ## License
 

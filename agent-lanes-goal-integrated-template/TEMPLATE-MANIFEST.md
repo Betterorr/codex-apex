@@ -11,6 +11,11 @@
 - `README.md`：Agent Lanes 基础说明和启用步骤。
 - `README-GOAL-INTEGRATED.md`：Agent Lanes 与 GOAL 开发基座集成说明。
 - `VERSION-HISTORY.md`：模板包对外发布和版本升级说明；每次重新打包前必须追加记录。
+- `value-slice.template.json`：每次派发前必须填写的纵向用户价值切片。
+- `value-slice-completion.template.json`：切片完成后的 before/after、验收结果和新鲜证据合同。
+- `value-slice-ledger.jsonl`：部署后创建的 Value Slice 正式交互预算账本。
+- `current-state.template.json`：紧凑当前状态源，避免主调度每轮重读巨型历史文档。
+- `product-feature-status.template.json`：用户可见 feature registry，与 provider/system capability registry 分离。
 - `BOOTSTRAP-PROMPT.md` / `BOOTSTRAP-PROMPT-GOAL-INTEGRATED.md`：初始化泳道时使用的启动提示词。
 
 ## 运行态模板
@@ -19,6 +24,13 @@
 - `agent-registry.schema.json`：`agent-lanes/agent-registry.json` 的结构校验参考。
 - `message-template.json`：主调度派发任务消息模板。
 - `completion-callback.template.json`：泳道完成回报模板。
+- `scripts/product_value_gate.py`：派发前的 fail-closed 产品价值门禁。
+- `scripts/value_slice_ledger.py`：统一记录 dispatch/direct execution/checkpoint，避免直接执行绕过预算。
+- `scripts/value_delta_gate.py`：完成后验证实际价值变化、验收结果和证据路径。
+- `scripts/evidence_receipt.py`：实际运行命令或核对 artifact，并生成带 dispatch id、退出码、输出 hash 或 artifact hash/mtime 的可验证 receipt。
+- `scripts/control_provenance.py`：为 evidence receipt 和 callback claim 提供项目独立的本地签名/验证；部署时初始化 `.codex/runtime/agent-lanes-control.key`。
+- `scripts/resolve_authorization.py`：按精确 capability/variant、授权状态与剩余额度解析外部副作用权限。
+- `scripts/build_portable_package.py`：发布前执行通用性、乱码、嵌套副本和必需文件检查，并生成带 SHA-256 的 zip/manifest；使用重复的 `--forbid-term <SOURCE_PROJECT_TERM>` 传入源项目名称、业务页面名、ID 前缀和行业专属词。
 - `worklog-template.md`：每条泳道的 `worklog.md` 初始模板。
 - `handoff-protocol.md`：泳道交接协议。
 - `review-protocol.md`：验收泳道协议。
@@ -38,6 +50,7 @@
 - `scripts/callback_post_office.py`：合并 pending callback，生成给主调度的完整 `thread_prompt`。
 - `scripts/check_callback_post_office.py`：检查短 wake、绕过邮局和历史异常。
 - `callback-inbox/post-office-policy.json`：目标项目部署时复制到 `agent-lanes/callback-inbox/post-office-policy.json` 的策略模板。
+- 邮局生成的 `orchestrator-message.md` 和 outbox `*-thread-send.json` 是人类可读投递产物，必须能被 Windows/PowerShell/桌面预览稳定显示中文；dashboard 顶部必须显示最新 outbox 是已生成待发送、待重试，还是已处理/已发送。
 
 核心规则：
 
@@ -71,13 +84,15 @@
 
 模板部署到新项目后，至少要完成这些检查：
 
-1. 可选运行 `python .\docs\agent-lanes-goal-integrated-template\scripts\deploy_agent_lanes_template.py`。脚本默认使用当前工作目录作为目标项目根目录、当前文件夹名作为项目名、`.` 作为主要模块目录、`pending_setup` 作为主调度线程 id；非默认模板路径才需要补 `--template-dir`。
+1. 可选运行 `python <TEMPLATE_DIR>\scripts\deploy_agent_lanes_template.py --target-root <TARGET_PROJECT_ROOT> --template-dir <TEMPLATE_DIR> --project-name <PROJECT_NAME> --primary-module <PRIMARY_MODULE> --orchestrator-thread-id <ORCHESTRATOR_THREAD_ID>`。
 2. `python agent-lanes\scripts\render_dashboard.py`
-3. `python -m py_compile agent-lanes\scripts\render_dashboard.py agent-lanes\scripts\deliver_callback.py agent-lanes\scripts\callback_post_office.py agent-lanes\scripts\check_callback_post_office.py`
-4. `powershell -ExecutionPolicy Bypass -File scripts\check-agent-lanes-post-office.ps1`
-5. Python 解析 `agent-lanes/agent-registry.json`。
-6. Python 逐行解析 `agent-lanes/message-log.jsonl`。
-7. 用 `deliver_callback.py --callback-file ... --no-start` 做一次最小邮局 smoke，确认输出含 `send_required`、`target_thread_id` 和 `thread_prompt`。
+3. `python -m py_compile agent-lanes\scripts\render_dashboard.py agent-lanes\scripts\deliver_callback.py agent-lanes\scripts\callback_post_office.py agent-lanes\scripts\check_callback_post_office.py agent-lanes\scripts\product_value_gate.py agent-lanes\scripts\value_slice_ledger.py agent-lanes\scripts\value_delta_gate.py agent-lanes\scripts\resolve_authorization.py`
+4. 依次运行 `product_value_gate.py --self-test`、`value_slice_ledger.py --self-test`、`value_delta_gate.py --self-test`、`resolve_authorization.py --self-test`。
+5. `powershell -ExecutionPolicy Bypass -File scripts\check-agent-lanes-post-office.ps1`
+6. Python 解析 `agent-lanes/agent-registry.json`。
+7. Python 逐行解析 `agent-lanes/message-log.jsonl` 和 `agent-lanes/transport-log.jsonl`。
+8. 用 `deliver_callback.py --callback-file ... --no-start` 做一次最小邮局 smoke，确认输出含 `send_required`、`target_thread_id` 和 `thread_prompt`。
+9. 首次启用或重大机制升级后，只运行 1-2 个低/中风险真实 Value Slice；复审 dispatch/callback/receipt/Value Delta/ledger/dashboard 记录后，才允许打开长期无人值守。
 
 ## 不做事项
 

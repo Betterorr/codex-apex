@@ -1,0 +1,51 @@
+{
+  "schema_version": "agent-lanes.current-state.v2",
+  "mechanism_version": "2.3",
+  "mechanism_status": "ready",
+  "updated_at": "YYYY-MM-DDTHH:mm:ss+08:00",
+  "north_star": "项目北极星用户闭环",
+  "active_value_slice": null,
+  "last_completed_value_slice": null,
+  "active_user_loop": "当前用户闭环",
+  "open_blocking_concerns": [],
+  "backlog_concerns": [],
+  "next_recommended_value_slice": "咨询性建议，需重新生成 Value Slice 并通过 Product Value Gate",
+  "dispatch_policy": {
+    "required_gate": "python agent-lanes/scripts/product_value_gate.py --dispatch-file <dispatch.json> --record-dispatch",
+    "candidate_gate": "python agent-lanes/scripts/product_value_gate.py --dispatch-file <dispatch.json> --dry-run",
+    "authoritative_ledger": "agent-lanes/value-slice-ledger.jsonl",
+    "required_completion_gate": "python agent-lanes/scripts/value_delta_gate.py --completion-file <completion.json> --dispatch-file <dispatch.json> --record",
+    "max_formal_callbacks_per_value_slice": 3,
+    "lane_recommendation_is_advisory": true,
+    "wrapper_without_blocker_is_rejected": true,
+    "dispatch_mode_required": true,
+    "single_active_slice_enforced": true,
+    "semantic_callback_identity_required": true,
+    "evidence_receipt_required": true,
+    "ledger_cross_process_lock": true
+    ,"global_active_dispatch_reservation": true,
+    "dispatch_contract_hash_required": true,
+    "authorization_resolved_inside_product_gate": true,
+    "signed_evidence_and_callback_provenance": true,
+    "trust_boundary": "cooperative local automation; not hostile same-user process isolation"
+  },
+  "review_policy": "bundle_or_stage_boundary_unless_high_risk_or_blocked",
+  "next_step_policy": "advisory_only",
+  "automation_policy": {
+    "auto_iteration_id": null,
+    "status": "disabled_until_user_authorized",
+    "authorization_basis": null,
+    "max_consecutive_auto_slices": 2,
+    "consecutive_auto_slices": 0,
+    "checkpoint_after_slices": 2,
+    "allowed_risk_levels": ["low_risk", "medium_risk"],
+    "require_product_value_gate": true,
+    "require_value_delta_gate": true,
+    "external_effects_policy": "exact_capability_authorization_resolver_required"
+    ,"unattended_autopilot_allowed": false
+    ,"requires_independent_reaudit_before_unattended_autopilot": true
+  },
+  "candidate_slices": [],
+  "business_log": "agent-lanes/message-log.jsonl",
+  "transport_log": "agent-lanes/transport-log.jsonl"
+}

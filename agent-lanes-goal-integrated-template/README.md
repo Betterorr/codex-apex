@@ -168,6 +168,10 @@ orchestrator -> 派给 review 或打回 development
   遇到 NEEDS_CONTEXT / 高风险 / 费用 / secret / 发布审批时停止并问用户
 ```
 
+不要从模板部署直接跳到长期无人值守。首次启用或重大机制升级后，先授权一个最多 1-2 个低/中风险 Value Slice 的受控迭代，真实完成 dispatch、callback、evidence receipt、Value Delta、ledger 和 dashboard 闭环；随后由未参与实现的 Agent 基于这些运行记录独立复审。复审通过前，`unattended_autopilot_allowed` 必须保持 `false`。
+
+Product Gate PASS 后，dispatch JSON 是不可变合同。`dispatch_hash`、`callback_provenance` 和门禁结果写入 sidecar / current-state，不得追加回合同文件。包含 `???`、Unicode replacement character 或明显乱码的人类可读 dispatch 必须 fail closed。
+
 ## 标准状态词
 
 每个 Agent 回报必须使用一个状态词：
@@ -190,15 +194,16 @@ orchestrator -> 派给 review 或打回 development
 - 独立审查。
 - 自进化规则补丁。
 
-## 必须停下来问用户的任务
+## 动态授权闸门
 
-- 真实付费 API 调用。
-- secret、key、账号权限。
+以下事项不是永久禁止项，而是需要先检查授权状态：
+
+- 真实付费 API 调用、secret、key、账号权限。
 - 删除、覆盖或迁移真实数据。
-- 发布上线。
-- 客户可用或生产可用声明。
-- 大范围架构改变。
-- 产品方向取舍。
+- 发布上线、客户可用或生产可用声明。
+- 大范围架构改变、产品方向取舍。
+
+如果已有覆盖本次范围的用户授权或 standing authorization，主调度应记录授权依据，交给守门/开发/验收走受控路径；未授权或超出范围时，才停下来问用户。
 
 ## 与 GOAL Skills 的分工
 
@@ -223,7 +228,8 @@ orchestrator -> 派给 review 或打回 development
 7. 用 `tooling-notes.md` 检查当前 Codex 环境可用工具。
 8. 先跑一个最小闭环：规划 -> 设计或开发 -> 守门或验收 -> 主调度合并。
 9. 刷新 `agent-lanes/dashboard.md`，确认 message-log、worklog 和 callback 都能被统一看到。
-10. 再考虑 heartbeat 自动推进。
+10. 先运行 1-2 个受控真实 Value Slice，并由未参与实现的 Agent 复审运行记录。
+11. 复审通过后，再考虑 heartbeat 或长期无人值守自动推进。
 
 ## 一句话原则
 

@@ -1,0 +1,34 @@
+{
+  "schema_version": "agent-lanes.value-slice-completion.v1",
+  "value_slice_id": "VS-YYYYMMDD-001",
+  "source_message_id": "msg-YYYYMMDD-001",
+  "status": "DONE | DONE_WITH_CONCERNS",
+  "expected_value_delta": "new_user_action | blocker_removed | quality_confidence | risk_reduction",
+  "actual_value_delta": {
+    "type": "new_user_action | blocker_removed | quality_confidence | risk_reduction",
+    "summary": "用户、主线阻塞、可信度或风险实际发生了什么变化。",
+    "before": "切片开始前的可观察状态。",
+    "after": "切片结束后的可观察状态。"
+  },
+  "acceptance_results": [
+    {
+      "criterion": "可验证完成标准",
+      "status": "PASS",
+      "evidence": ["ev-example-summary"]
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "ev-example-summary",
+      "type": "artifact | command",
+      "path": "artifacts/example/summary.json",
+      "command": "命令类型证据填写与 receipt 完全一致的命令字符串；artifact 类型删除本字段",
+      "receipt_path": "artifacts/example/receipts/ev-example-summary.json",
+      "status": "verified",
+      "fresh_at": "YYYY-MM-DDTHH:mm:ss+08:00"
+    }
+  ],
+  "blocking_concerns": [],
+  "backlog_concerns": [],
+  "completed_at": "YYYY-MM-DDTHH:mm:ss+08:00"
+}

@@ -1,21 +1,34 @@
 ﻿# Agent Lanes 初始化提示词
 
-把 `agent-lanes-goal-integrated-template/` 这个模板文件夹复制到另一个项目后，可以把下面这段提示词发给 Codex，让它在目标项目里初始化整套 Agent Lanes 机制。默认不需要填写项目名：Codex 当前工作目录就是目标项目根目录，当前文件夹名就是项目名。
+把 `docs/agent-lanes-working-copy/` 这个模板文件夹复制到另一个项目后，可以把下面这段提示词发给 Codex，让它在目标项目里初始化整套 Agent Lanes 机制。
 
 ## 使用方式
 
-如果模板位于 `docs/agent-lanes-goal-integrated-template/`，直接把完整提示词发给 Codex。非默认路径时，只需要告诉 Codex 实际模板目录。
+先替换占位符：
+
+- `<TARGET_PROJECT_ROOT>`: 目标项目根目录，例如 `D:\00-antigravity\NewProject`
+- `<TEMPLATE_DIR>`: 复制过去的 Agent Lanes 模板目录，例如 `D:\00-antigravity\NewProject\docs\agent-lanes`
+- `<PROJECT_NAME>`: 项目名，例如 `NewProject`
+- `<PRIMARY_MODULE>`: 主要代码模块目录，例如 `webapp`、`shoplens`、`src`；如果没有就写 `.`。
+
+然后把完整提示词发给 Codex。
 
 ## 可复制提示词
 
 ```text
 你现在在 Codex 里工作。请在这个项目中初始化一套 Agent Lanes 多泳道协作机制。
 
-默认假设：
-- 当前 Codex 工作目录就是目标项目根目录。
-- 当前项目文件夹名就是项目名。
-- 模板目录在 docs/agent-lanes-goal-integrated-template。
-- 主要模块目录先使用 .。
+目标项目根目录：
+<TARGET_PROJECT_ROOT>
+
+模板目录：
+<TEMPLATE_DIR>
+
+项目名：
+<PROJECT_NAME>
+
+主要模块目录：
+<PRIMARY_MODULE>
 
 请按以下要求执行：
 
@@ -86,7 +99,7 @@
    - 规划泳道：产品目标、阶段范围、优先级、验收标准、任务切片。
    - 设计泳道：前端页面设计、信息架构、用户路径、交互状态、视觉规范、设计验收标准。
    - 开发泳道：实现已批准任务、运行验证、提交变更文件和证据。
-   - 守门泳道：检查权限、隐私、secret、外部 API、付费调用、发布和平台风险。
+   - 守门泳道：检查权限、隐私、secret、外部 API、付费调用、发布和平台风险，并把高风险事项转成可授权、可验证、可回滚的动态边界闸门。
    - 验收泳道：独立验收规划、设计、开发结果，检查目标、标准、风险和新鲜证据。
    - 进化泳道：沉淀重复失败、改进模板；没有明确复发信号前保持 paused。
 
@@ -94,7 +107,7 @@
    - 不要批量删除文件或目录。
    - 不要使用 `del /s`、`rd /s`、`rmdir /s`、`Remove-Item -Recurse`、`rm -rf`。
    - 需要删除文件时，只能一次删除一个明确路径的文件。
-   - 遇到 secret、真实付费 API、发布上线、生产可用声明、真实数据迁移或产品方向取舍时，必须停下来问用户。
+   - 遇到 secret、真实付费 API、发布上线、生产可用声明、真实数据迁移或产品方向取舍时，先检查是否已有覆盖本次范围的用户授权；已有授权则记录依据并按守门条件推进，未授权或超出范围时才停下来问用户。
 
 10. 初始化完成后请做校验：
    - `agent-registry.json` 能被 JSON parser 正常解析。

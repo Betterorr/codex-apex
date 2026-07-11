@@ -4,6 +4,18 @@
 
 线程标题和泳道显示名尽量使用中文，不加项目名前缀；项目名、模块名放在任务上下文和文档里。
 
+## Agent Lanes V2 / Value Slice Gate（高优先级覆盖）
+
+- 每个新派发必须绑定一份 `agent-lanes.value-slice.v2`，dispatch envelope 显式写 `dispatch_mode=manual|auto`，并在发送前运行 `python agent-lanes/scripts/product_value_gate.py --dispatch-file <dispatch.json> --record-dispatch`。候选验证只能显式使用 `--dry-run`。
+- Value Slice 必须说明用户结果、新增动作、价值变化、主承载面、验收标准、审查策略和最多 3 次 callback 预算。
+- `consumer`、`handoff`、`checkpoint`、`readiness`、`review_surface`、纯截图和纯证据任务默认拒绝；只有引用明确的 P1/P2 `blocking_concern_id` 才可作为例外。
+- `recommended_next_*` 只作咨询，不能自动触发派发；callback 关闭后允许进入 `idle_with_recommendation`。
+- 低/中风险本地切片在功能包或阶段边界合并审查，不逐 callback 派验收。
+- 用户可见页面、动作和 workflow 写入 `docs/product-feature-status.json`；provider、SDK、模型、执行引擎和授权边界才写 capability registry。
+- `message-log.jsonl` 只保存业务任务与 completion callback；`transport-log.jsonl` 保存 spooling、batching 和 orchestrator state。
+- `dashboard.md` 只展示当前状态；完整历史写入 `dashboard-full.md`。
+- completion 缺 dispatch/ledger 追踪或缺 `evidence_receipt.py` receipt 时 fail closed；callback 必须精确匹配注册泳道、dispatch target、`reply_to` 与 `value_slice_id`，并计入 ledger callback budget。
+
 ## 泳道清单
 
 | lane | 中文名 | purpose | current_session | write_scope | read_scope | worklog | workspace | status |
@@ -12,14 +24,14 @@
 | planning | 规划泳道 | 产品目标、阶段范围、优先级、验收标准、任务切片、需求变更落档 | codex:TODO | `docs/01-product-spec.md`, `docs/03-dev-plan.md`, `agent-lanes/lanes/planning/` | `docs/`, `agent-lanes/`, `<PRIMARY_MODULE>/` 只读 | `agent-lanes/lanes/planning/worklog.md` | `agent-lanes/lanes/planning/workspace/` | active |
 | design | 设计泳道 | 前端页面设计、信息架构、用户路径、交互状态、视觉规范、设计验收标准 | codex:TODO | `docs/02-design-brief.md`, `agent-lanes/lanes/design/` | `docs/`, `agent-lanes/`, `<PRIMARY_MODULE>/` 只读 | `agent-lanes/lanes/design/worklog.md` | `agent-lanes/lanes/design/workspace/` | active |
 | development | 开发泳道 | 按已批准目标实现、修复、运行验证、提交变更文件和证据 | codex:TODO | `<PRIMARY_MODULE>/`, `tests/`, `docs/04-goal-log.md`, `agent-lanes/lanes/development/` | `docs/`, `agent-lanes/`, `<PRIMARY_MODULE>/`, `tests/` | `agent-lanes/lanes/development/worklog.md` | `agent-lanes/lanes/development/workspace/` | active |
-| guardian | 守门泳道 | 检查权限、隐私、secret、外部 API、AI/付费调用、真实写入、发布和平台风险 | codex:TODO | `docs/capability-status.json`, `docs/capability-provider-contract.md`, `agent-lanes/lanes/guardian/` | `docs/`, `agent-lanes/`, `<PRIMARY_MODULE>/` 只读 | `agent-lanes/lanes/guardian/worklog.md` | `agent-lanes/lanes/guardian/workspace/` | active |
+| guardian | 守门泳道 | 检查权限、隐私、secret、外部 API、AI/付费调用、真实写入、发布和平台风险，并把高风险事项转成可授权、可验证、可回滚的动态边界闸门 | codex:TODO | `docs/capability-status.json`, `docs/capability-provider-contract.md`, `agent-lanes/lanes/guardian/` | `docs/`, `agent-lanes/`, `<PRIMARY_MODULE>/` 只读 | `agent-lanes/lanes/guardian/worklog.md` | `agent-lanes/lanes/guardian/workspace/` | active |
 | review | 验收泳道 | 独立验收规划、设计、开发和守门结果，检查目标、标准、风险和新鲜证据 | codex:TODO | `docs/05-review-report.md`, `docs/06-release-record.md`, `agent-lanes/lanes/review/` | 全项目只读 | `agent-lanes/lanes/review/worklog.md` | `agent-lanes/lanes/review/workspace/` | active |
 | evolution | 进化泳道 | 沉淀重复失败、调整 Skill 边界、改进模板、同步可复用规则 | codex:TODO | `.agents/`, `.codex/`, `docs/agent-lanes-goal-integrated-template/`, `agent-lanes/lanes/evolution/` | `docs/`, `agent-lanes/`, `.agents/`, `.codex/` | `agent-lanes/lanes/evolution/worklog.md` | `agent-lanes/lanes/evolution/workspace/` | paused |
 
 ## 使用规则
 
 - `current_session` 必须对应当前负责该 Lane 的 Codex thread id 或 deep link；线程工具不可用时写 `pending_setup`，不要伪造 thread id。
-- `write_scope` 只表示默认可写范围；涉及高风险、secret、真实数据写入、真实付费调用或发布时仍需用户批准。
+- `write_scope` 只表示默认可写范围；涉及高风险、secret、真实数据写入、真实付费调用或发布时，先检查是否已有覆盖本次范围的用户授权；已有授权则按守门条件推进，未授权或超出范围时才请求用户批准。
 - 一个 Lane 可以暂时没有线程，但必须标记 `pending_setup`。
 - 替换线程时，只更新 `current_session`，不要改变 Lane 名称和职责。
 - 每个 Lane 的工作必须写入对应 `worklog`，中间产物放入对应 `workspace`。
@@ -62,7 +74,7 @@
 - `orchestrator`: 判断本轮是直接执行，还是先 Plan Refresh；若派发任务，必须说明它补哪条骨架环节。
 - `planning`: 维护 Skeleton Pass、Real Pass、Quality Pass、Production Pass，并给出 3-6 个最高价值薄纵向切片。
 - `development`: 只执行计划中的下一刀；开发前说明补哪条骨架链路，完成后说明下一个非同能力骨架节点。
-- `guardian`: 只在真实 provider/API/账号/成本/受监管操作/高风险自动化执行/外部写入等风险处卡边界，不把普通准备壳层变成独立阶段。
+- `guardian`: 在真实 provider/API/账号/成本/受监管操作/高风险自动化执行/外部写入等风险处建立授权、预算、输入、secret、回滚和证据规则；它是动态闸门，不是永久禁区，不把普通准备壳层变成独立阶段。
 - `review`: 阶段边界检查骨架是否更接近端到端可运行，而不只检查文件是否有改动。
 - `evolution`: 当系统再次陷入局部深挖或骨架判断缺失时，沉淀规则。
 
@@ -80,7 +92,7 @@ Plan Refresh -> Thin Slice Execute -> Focused Verify -> Dashboard/Docs Merge -> 
 
 - `capture_only`: 背景、偏好、观察或仍不稳定的想法。写入合适文档或 message-log，不派发执行任务。
 - `dispatch_needed`: 已经形成稳定小任务。派给合适泳道；线程工具不可用时写 `pending_dispatch` fallback。
-- `confirmation_needed`: 涉及路线锁定、产品取舍、真实外部调用、付费、secret、账号、持久写入、受监管操作/高风险自动化执行、生产声明或重型框架采用。先给用户确认卡，不派发产品化开发。
+- `confirmation_needed`: 涉及路线锁定、产品取舍、真实外部调用、付费、secret、账号、持久写入、受监管操作/高风险自动化执行、生产声明或重型框架采用，且尚未覆盖在当前授权内。先给用户确认卡；已有授权时记录依据并进入受控执行。
 - `clarify_needed`: 信息不足且合理假设会明显跑偏。只问最小必要问题，并把未决点写入 message-log 或对应文档。
 
 讨论 intake 的最低动作：
@@ -96,7 +108,7 @@ Plan Refresh -> Thin Slice Execute -> Focused Verify -> Dashboard/Docs Merge -> 
 | --- | --- | --- | --- | --- |
 | 探讨需求、产品想法、功能取舍、目标用户、先做什么不做什么 | `product-spec-builder` | `planning` | `docs/01-product-spec.md`, `docs/03-dev-plan.md` | 形成稳定需求切片、验收标准或产品边界时 |
 | 探讨计划、阶段路线、优先级、里程碑、下一轮 GOAL | `dev-planner`; 目标不清时加 `goal-creator` | `planning` 或 `orchestrator` | `docs/03-dev-plan.md`, `docs/04-goal-log.md` | 需要拆任务、定阶段、改优先级或建立 GOAL 时 |
-| 探讨技术方案、架构、数据源、开源库、provider/API、模型或能力接入 | `dev-planner`; 涉及真实调用/secret/条款/成本时加 `gate-runner` 或 `code-reviewer` | `planning`, `guardian`; 确认后才到 `development` | `docs/09-research-roadmap.md`, `docs/13-l1-l5-information-source-architecture.md`, `docs/14-market-candidate-classification.md`, `docs/capability-status.json`, provider card | 低风险调研可派规划；真实 provider/API/模型/付费/账号/受监管操作/高风险自动化执行能力必须先进守门 |
+| 探讨技术方案、架构、数据源、开源库、provider/API、模型或能力接入 | `dev-planner`; 涉及真实调用/secret/条款/成本时加 `gate-runner` 或 `code-reviewer` | `planning`, `guardian`; 授权/守门后到 `development` | `docs/09-research-roadmap.md`, `docs/13-l1-l5-information-source-architecture.md`, `docs/14-market-candidate-classification.md`, `docs/capability-status.json`, provider card | 低风险调研可派规划；真实 provider/API/模型/付费/账号/受监管操作/高风险自动化执行能力走动态授权闸门，已有授权时应推进受控 smoke/样本/接线 |
 | 探讨 UI、页面体验、信息架构、交互状态、面板或原型 | `design-brief-builder`; 需要 demo 时加 `prototype-builder` | `design` | `docs/02-design-brief.md` | 有明确页面、用户路径或状态覆盖要求时 |
 | 讨论实现、联调、本地验证、脚本、fixture、端到端样本 | `dev-builder`, `bug-fixer`, `gate-runner` | `development` | `scripts/`, `artifacts/`, `<PRIMARY_MODULE>/`, `docs/03-dev-plan.md`, `docs/capability-status.json` | 需求、边界和风险都清楚时；否则先规划或守门 |
 | 讨论验收、完成判断、证据冲突、风险复核、是否可收工 | `review-runner`, `gate-runner`, `code-reviewer` | `review` | `docs/05-review-report.md`, `agent-lanes/dashboard.md` | 已有产物或 callback 需要独立核对时 |
